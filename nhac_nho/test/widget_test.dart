@@ -1,30 +1,61 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Smoke test khởi động NhacNhoApp.
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
-
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:nhac_nho/application/providers.dart';
+import 'package:nhac_nho/domain/entities/body_profile.dart';
+import 'package:nhac_nho/domain/entities/user_settings.dart';
+import 'package:nhac_nho/domain/repositories/reminder_repository.dart';
+import 'package:nhac_nho/domain/repositories/settings_repository.dart';
+import 'package:nhac_nho/domain/services/notification_scheduler.dart';
 import 'package:nhac_nho/main.dart';
 
+class MockReminderRepository extends Mock implements ReminderRepository {}
+
+class MockSettingsRepository extends Mock implements SettingsRepository {}
+
+class MockNotificationScheduler extends Mock implements NotificationScheduler {}
+
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('NhacNhoApp khởi động và hiển thị màn Hôm nay', (tester) async {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    await initializeDateFormatting('vi');
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    final reminderRepo = MockReminderRepository();
+    final settingsRepo = MockSettingsRepository();
+    final scheduler = MockNotificationScheduler();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    when(() => reminderRepo.getAllReminders()).thenAnswer((_) async => []);
+    when(() => reminderRepo.getCompletionLogsByDate(any()))
+        .thenAnswer((_) async => []);
+    when(() => reminderRepo.getCompletionLogsInRange(any(), any()))
+        .thenAnswer((_) async => []);
+    when(() => settingsRepo.getUserSettings())
+        .thenAnswer((_) async => const UserSettings());
+    when(() => settingsRepo.getBodyProfile())
+        .thenAnswer((_) async => const BodyProfile());
+    when(() => settingsRepo.hasCompletedOnboarding())
+        .thenAnswer((_) async => false);
+    when(() => scheduler.rescheduleAll(any())).thenAnswer((_) async {});
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          reminderRepositoryProvider.overrideWithValue(reminderRepo),
+          settingsRepositoryProvider.overrideWithValue(settingsRepo),
+          notificationSchedulerProvider.overrideWithValue(scheduler),
+        ],
+        child: const NhacNhoApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hôm nay'), findsWidgets);
+    expect(find.text('Ngủ & Ăn'), findsOneWidget);
+    expect(find.text('Thống kê'), findsOneWidget);
+    expect(find.text('Cài đặt'), findsOneWidget);
   });
 }
