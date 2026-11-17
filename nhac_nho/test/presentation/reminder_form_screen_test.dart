@@ -83,6 +83,8 @@ void main() {
   testWidgets('báo lỗi khi tên nhắc rỗng', (tester) async {
     await tester.pumpWidget(wrapForm());
     await tester.pumpAndSettle();
+    await tester.runAsync(() => GoogleFonts.pendingFonts());
+    await tester.pumpAndSettle();
 
     final saveBtn = find.text('Lưu nhắc nhở');
     await tester.ensureVisible(saveBtn);

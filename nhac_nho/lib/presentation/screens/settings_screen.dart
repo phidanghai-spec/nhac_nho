@@ -1,4 +1,4 @@
-﻿// Màn hình Cài đặt chọn Preset mẫu, giờ mặc định và kiểm tra quyền hệ thống.
+// Màn hình Cài đặt chọn Preset mẫu, giờ mặc định và kiểm tra quyền hệ thống.
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -188,15 +188,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         const SizedBox(height: 6),
                         Text(preset.description),
                         const SizedBox(height: 10),
-                        SizedBox(
-                          height: 48,
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () => _applyPreset(preset.id),
-                            child: Text(
-                              selected
-                                  ? 'Áp dụng lại mẫu này'
-                                  : 'Chọn mẫu ${preset.name}',
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 48),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: () => _applyPreset(preset.id),
+                              child: Text(
+                                selected
+                                    ? 'Áp dụng lại mẫu này'
+                                    : 'Chọn mẫu ${preset.name}',
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                         ),

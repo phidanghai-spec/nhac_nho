@@ -1,4 +1,4 @@
-﻿// Chủ đề sáng/tối và tương phản cao dùng FlexColorScheme, GoogleFonts và DynamicColor.
+// Chủ đề sáng/tối và tương phản cao dùng FlexColorScheme, GoogleFonts và DynamicColor.
 
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:material_ui/material_ui.dart';
@@ -158,6 +158,31 @@ class AppTheme {
           fontWeight: FontWeight.w400,
           color: mutedColor,
         ),
+        labelMedium: GoogleFonts.beVietnamPro(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: base.colorScheme.onSurface,
+        ),
+        labelSmall: GoogleFonts.beVietnamPro(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: base.colorScheme.onSurface,
+        ),
+      ),
+      chipTheme: base.chipTheme.copyWith(
+        labelStyle: GoogleFonts.beVietnamPro(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: base.colorScheme.onSurface,
+        ),
+        secondaryLabelStyle: GoogleFonts.beVietnamPro(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: base.colorScheme.onSecondaryContainer,
+        ),
+      ),
+      floatingActionButtonTheme: base.floatingActionButtonTheme.copyWith(
+        elevation: 2,
       ),
       materialTapTargetSize: MaterialTapTargetSize.padded,
       visualDensity: VisualDensity.standard,

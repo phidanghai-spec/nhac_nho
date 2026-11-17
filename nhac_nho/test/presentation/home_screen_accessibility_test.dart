@@ -116,6 +116,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.runAsync(() => GoogleFonts.pendingFonts());
+    await tester.pumpAndSettle();
   }
 
   testWidgets('HomeScreen không overflow với textScaler = 2.0 ở theme sáng', (tester) async {

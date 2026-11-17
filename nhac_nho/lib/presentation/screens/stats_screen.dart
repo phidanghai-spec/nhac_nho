@@ -1,4 +1,4 @@
-﻿// Màn hình Thống kê hiển thị Streak và biểu đồ hoàn thành 7 ngày.
+// Màn hình Thống kê hiển thị Streak và biểu đồ hoàn thành 7 ngày.
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -52,6 +52,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.runAsync(() => GoogleFonts.pendingFonts());
+    await tester.pumpAndSettle();
 
     expect(find.text('Hôm nay'), findsWidgets);
     expect(find.text('Ngủ & Ăn'), findsOneWidget);

@@ -1,4 +1,4 @@
-﻿// Màn hình Thể trạng, Dinh dưỡng & Giấc ngủ.
+// Màn hình Thể trạng, Dinh dưỡng & Giấc ngủ.
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

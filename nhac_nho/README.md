@@ -36,11 +36,12 @@ flutter build apk --debug
 ```
 
 ## Ảnh màn hình
-*(Chụp và bổ sung ảnh từ máy thật sau khi chạy trên thiết bị Android)*
-- Màn hình Hôm nay (Sáng / Tối)
-- Màn hình Thể trạng, Dinh dưỡng & Giấc ngủ
-- Màn hình Thống kê 7 ngày
-- Màn hình Cài đặt & Quyền hệ thống
+Đã xuất 10 ảnh PNG cho 5 màn hình chính (Light & Dark) trong thư mục [docs/screenshots](docs/screenshots):
+- **Hôm nay:** `01_home_light.png` / `01_home_dark.png`
+- **Thêm/Sửa nhắc:** `02_reminder_form_light.png` / `02_reminder_form_dark.png`
+- **Thể trạng, Dinh dưỡng & Giấc ngủ:** `03_sleep_nutrition_light.png` / `03_sleep_nutrition_dark.png`
+- **Thống kê 7 ngày:** `04_stats_light.png` / `04_stats_dark.png`
+- **Cài đặt & Quyền hệ thống:** `05_settings_light.png` / `05_settings_dark.png`
 
 ## Bảng ghi kết quả test trên máy thật (Mục 11.3)
 | Máy / Hãng / Android | T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9 | T10 | T11 | Ghi chú |

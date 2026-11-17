@@ -1,4 +1,4 @@
-﻿// Màu sắc đạt chuẩn WCAG AA (>= 4.5:1), icon và nhãn tiếng Việt cho 4 loại nhắc.
+// Màu sắc đạt chuẩn WCAG AA (>= 4.5:1), icon và nhãn tiếng Việt cho 4 loại nhắc.
 
 import 'package:material_ui/material_ui.dart';
 
