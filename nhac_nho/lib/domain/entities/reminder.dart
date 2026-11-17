@@ -1,4 +1,4 @@
-﻿// Entity Reminder bất biến đại diện cho một mục nhắc nhở.
+// Entity Reminder bất biến đại diện cho một mục nhắc nhở.
 
 enum ReminderCategory {
   task,

@@ -1,4 +1,4 @@
-﻿// Tên notification channel, khóa lưu cài đặt và hằng số dùng chung toàn app.
+// Tên notification channel, khóa lưu cài đặt và hằng số dùng chung toàn app.
 
 class NotificationChannelConfig {
   const NotificationChannelConfig._();

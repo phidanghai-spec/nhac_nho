@@ -1,4 +1,4 @@
-﻿// Interface SettingsRepository lưu/đọc UserSettings và BodyProfile.
+// Interface SettingsRepository lưu/đọc UserSettings và BodyProfile.
 
 import '../entities/body_profile.dart';
 import '../entities/user_settings.dart';

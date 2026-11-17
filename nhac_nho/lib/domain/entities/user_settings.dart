@@ -1,4 +1,4 @@
-﻿// Entity UserSettings lưu cấu hình mặc định của người dùng.
+// Entity UserSettings lưu cấu hình mặc định của người dùng.
 
 class UserSettings {
   const UserSettings({

@@ -1,4 +1,4 @@
-﻿// Triển khai ReminderRepository sử dụng AppDatabase (sqflite).
+// Triển khai ReminderRepository sử dụng AppDatabase (sqflite).
 
 import 'package:sqflite/sqflite.dart';
 

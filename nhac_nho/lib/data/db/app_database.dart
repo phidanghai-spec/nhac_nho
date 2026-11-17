@@ -1,4 +1,4 @@
-﻿// Cấu hình và khởi tạo SQLite (sqflite) cho bảng reminders và completion_logs.
+// Cấu hình và khởi tạo SQLite (sqflite) cho bảng reminders và completion_logs.
 
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';

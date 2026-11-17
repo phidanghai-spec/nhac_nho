@@ -1,4 +1,4 @@
-﻿// Interface ReminderRepository cho thao tác CRUD nhắc nhở và completion logs.
+// Interface ReminderRepository cho thao tác CRUD nhắc nhở và completion logs.
 
 import '../entities/completion_log.dart';
 import '../entities/reminder.dart';

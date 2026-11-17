@@ -1,4 +1,4 @@
-﻿// Triển khai SettingsRepository sử dụng SharedPreferences.
+// Triển khai SettingsRepository sử dụng SharedPreferences.
 
 import 'dart:convert';
 

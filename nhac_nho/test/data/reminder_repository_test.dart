@@ -1,4 +1,4 @@
-﻿// Unit test cho ReminderRepository với sqflite_common_ffi.
+// Unit test cho ReminderRepository với sqflite_common_ffi.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nhac_nho/data/db/app_database.dart';

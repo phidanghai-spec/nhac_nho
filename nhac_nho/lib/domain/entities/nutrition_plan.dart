@@ -1,4 +1,4 @@
-﻿// Entity NutritionPlan chứa kết quả phân tích BMI, TDEE, đạm, nước và lịch ăn.
+// Entity NutritionPlan chứa kết quả phân tích BMI, TDEE, đạm, nước và lịch ăn.
 
 import 'reminder.dart';
 

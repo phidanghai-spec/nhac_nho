@@ -1,4 +1,4 @@
-﻿// Entity PresetProfile mô tả cấu hình 4 bộ lịch mẫu theo đối tượng.
+// Entity PresetProfile mô tả cấu hình 4 bộ lịch mẫu theo đối tượng.
 
 import 'reminder.dart';
 import 'user_settings.dart';
