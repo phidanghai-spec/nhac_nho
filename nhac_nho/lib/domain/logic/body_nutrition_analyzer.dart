@@ -1,4 +1,4 @@
-﻿// Logic thuần Dart phân tích thể trạng, chế độ ăn, ca làm việc và lịch tập gym.
+// Logic thuần Dart phân tích thể trạng, chế độ ăn, ca làm việc và lịch tập gym.
 
 import 'dart:math' as math;
 
@@ -167,30 +167,45 @@ class BodyNutritionAnalyzer {
       final meal1 = wakeTime.addMinutes(45);
       final meal2 = wakeTime.addMinutes(5 * 60 + 30);
       final lateSnack = wakeTime.addMinutes(9 * 60);
-      final meal3 = bedtime.subtractMinutes(150);
+      final beforeSleepMin = dinnerCutoffHours > 3.0
+          ? (dinnerCutoffHours * 60).round()
+          : 150;
+      final meal3 = bedtime.subtractMinutes(beforeSleepMin);
+
+      final meal1Advice = profile.condition == HealthCondition.stomachReflux
+          ? _breakfastAdvice(profile, proteinFood)
+          : 'Bữa chính đủ năng lượng trước ca: Tinh bột chậm (gạo lứt, khoai lang, yến mạch) + '
+              '$proteinFood + rau xanh.$veganIronTip';
+
+      final meal2Prefix = (profile.goal == FitnessGoal.loseWeight ||
+              profile.condition == HealthCondition.bloodSugar)
+          ? 'Quy tắc ăn ngược: Rau xanh trước -> Đạm ($proteinFood) -> Tinh bột chậm sau cùng. '
+          : '';
 
       items.addAll([
         MealRecommendation(
           hour: meal1.hour,
           minute: meal1.minute,
           title: 'Bữa 1 – Khởi đầu ca làm việc',
-          foodAdvice:
-              'Bữa chính đủ năng lượng trước ca: Tinh bột chậm (gạo lứt, khoai lang, yến mạch) + '
-              '$proteinFood + rau xanh.$veganIronTip',
+          foodAdvice: meal1Advice,
         ),
         MealRecommendation(
           hour: meal2.hour,
           minute: meal2.minute,
           title: 'Bữa 2 – Bữa chính giữa ca đêm',
           foodAdvice:
-              'Ăn bữa ấm nóng vừa bụng: Cơm mềm/súp + $proteinFood + rau củ luộc. '
+              '$meal2PrefixĂn bữa ấm nóng vừa bụng: Cơm mềm/súp + $proteinFood + rau củ luộc. '
               'Tránh đồ chiên rán nhiều dầu mỡ gây nặng bụng.$veganIronTip',
         ),
         MealRecommendation(
           hour: lateSnack.hour,
           minute: lateSnack.minute,
-          title: 'Bữa phụ rạng sáng (Dưới 200 kcal)',
-          foodAdvice: _lightSnackAdvice(profile.dietType),
+          title: profile.goal == FitnessGoal.gainWeight
+              ? 'Bữa phụ rạng sáng tăng năng lượng'
+              : 'Bữa phụ rạng sáng (Dưới 200 kcal)',
+          foodAdvice: profile.goal == FitnessGoal.gainWeight
+              ? _gainSnackAdvice(profile.dietType)
+              : _lightSnackAdvice(profile.dietType),
         ),
         MealRecommendation(
           hour: meal3.hour,
@@ -199,10 +214,23 @@ class BodyNutritionAnalyzer {
           foodAdvice: _beforeDaySleepAdvice(profile.dietType),
         ),
       ]);
+
+      if (profile.goal == FitnessGoal.loseWeight ||
+          profile.condition == HealthCondition.bloodSugar) {
+        final walkTime = meal3.addMinutes(30);
+        items.add(
+          MealRecommendation(
+            hour: walkTime.hour,
+            minute: walkTime.minute,
+            title: 'Đi bộ nhẹ 10–15 phút sau bữa cuối ca',
+            foodAdvice:
+                'Vận động nhẹ giúp ổn định đường huyết trước khi về nghỉ.',
+            category: ReminderCategory.hydration,
+          ),
+        );
+      }
     } else {
-      final breakfast = wakeTime.addMinutes(
-        profile.condition == HealthCondition.stomachReflux ? 30 : 30,
-      );
+      final breakfast = wakeTime.addMinutes(30);
       final isSenior = profile.condition == HealthCondition.seniorCardio ||
           profile.age >= 60;
       final lunch =

@@ -1,4 +1,4 @@
-﻿// Logic thuần Dart cung cấp 4 bộ lịch mẫu (Presets) và tích hợp lịch sinh hoạt cá nhân hóa.
+// Logic thuần Dart cung cấp 4 bộ lịch mẫu (Presets) và tích hợp lịch sinh hoạt cá nhân hóa.
 
 import '../entities/body_profile.dart';
 import '../entities/preset_profile.dart';

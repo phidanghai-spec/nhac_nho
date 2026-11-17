@@ -14,6 +14,7 @@ abstract class ReminderRepository {
     bool? isRoutine,
   });
   Future<void> replaceAllReminders(List<Reminder> reminders);
+  Future<void> replaceRoutineReminders(List<Reminder> routines);
 
   Future<int> upsertCompletionLog(CompletionLog log);
   Future<List<CompletionLog>> getCompletionLogsByDate(String date);

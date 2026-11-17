@@ -1,4 +1,4 @@
-﻿// Unit test cho BodyNutritionAnalyzer (mục 6.5).
+// Unit test cho BodyNutritionAnalyzer (mục 6.5).
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nhac_nho/domain/entities/body_profile.dart';
@@ -233,6 +233,46 @@ void main() {
           .toList();
       // 16:00+45p=16:45; 16:00+5h30=21:30; 16:00+9h=01:00; 08:00-2h30=05:30
       expect(times, ['16:45', '21:30', '01:00', '05:30']);
+    });
+
+    test('ca ăn chay trứng sữa (vegetarian): không gợi ý thịt cá, có trứng/sữa chua/đậu phụ', () {
+      const profile = BodyProfile(dietType: DietType.vegetarian);
+      final plan = BodyNutritionAnalyzer.analyze(
+        profile,
+        wakeTime: const ClockTime(6, 30),
+        bedtime: const ClockTime(22, 45),
+      );
+      final advice = plan.mealScheduleRecommendations
+          .map((m) => m.foodAdvice.toLowerCase())
+          .join(' ');
+      expect(advice, contains('trứng'));
+      expect(advice, contains('đậu phụ'));
+      expect(advice, isNot(contains('ức gà')));
+    });
+
+    test('ca xoay ca dậy lúc 14:00 kèm trào ngược: áp dụng lịch neo theo wakeTime và dinnerCutoff 4.0h', () {
+      const profile = BodyProfile(
+        workShift: WorkShift.rotatingShift,
+        condition: HealthCondition.stomachReflux,
+      );
+      final plan = BodyNutritionAnalyzer.analyze(
+        profile,
+        wakeTime: const ClockTime(14, 0),
+        bedtime: const ClockTime(6, 0),
+      );
+      expect(plan.recommendedDinnerCutoffHours, 4.0);
+      expect(
+        plan.mealScheduleRecommendations.first.foodAdvice,
+        contains('ấm mềm'),
+      );
+      // 06:00 - 4h = 02:00
+      expect(
+        ClockTime(
+          plan.mealScheduleRecommendations.last.hour,
+          plan.mealScheduleRecommendations.last.minute,
+        ).format24h(),
+        '02:00',
+      );
     });
   });
 }

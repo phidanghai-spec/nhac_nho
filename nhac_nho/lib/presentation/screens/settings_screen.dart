@@ -291,14 +291,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                                   (m) => ChoiceChip(
                                     label: Text('$m phút'),
                                     selected: settings.waterIntervalMin == m,
-                                    onSelected: (_) {
-                                      ref
+                                    onSelected: (_) async {
+                                      await ref
                                           .read(userSettingsProvider.notifier)
                                           .save(
                                             settings.copyWith(
                                               waterIntervalMin: m,
                                             ),
                                           );
+                                      await ref
+                                          .read(reminderControllerProvider
+                                              .notifier)
+                                          .rescheduleAll();
                                     },
                                   ),
                                 )
@@ -494,8 +498,8 @@ class _PermissionStatusRow extends StatelessWidget {
         Row(
           children: [
             Icon(
-              granted ? Icons.circle : Icons.circle,
-              size: 14,
+              granted ? Icons.check_circle : Icons.cancel,
+              size: 18,
               color: statusColor,
             ),
             const SizedBox(width: 8),

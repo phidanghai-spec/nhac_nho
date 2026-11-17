@@ -18,7 +18,7 @@ class AppTheme {
       return _applyAccessibleTypography(
         FlexThemeData.light(
           useMaterial3: true,
-          colors: const FlexSchemeColor(
+          colorScheme: const ColorScheme.highContrastLight(
             primary: Color(0xFF003D38),
             primaryContainer: Color(0xFFD6F5F0),
             secondary: Color(0xFF102A7A),
@@ -29,11 +29,6 @@ class AppTheme {
           surface: Colors.white,
           scaffoldBackground: Colors.white,
           subThemesData: _subThemes,
-        ).copyWith(
-          colorScheme: const ColorScheme.highContrastLight(
-            primary: Color(0xFF003D38),
-            secondary: Color(0xFF102A7A),
-          ),
         ),
         Brightness.light,
       );
@@ -68,7 +63,7 @@ class AppTheme {
       return _applyAccessibleTypography(
         FlexThemeData.dark(
           useMaterial3: true,
-          colors: const FlexSchemeColor(
+          colorScheme: const ColorScheme.highContrastDark(
             primary: Color(0xFF99F6E4),
             primaryContainer: Color(0xFF064E3B),
             secondary: Color(0xFFBFDBFE),
@@ -79,11 +74,6 @@ class AppTheme {
           surface: const Color(0xFF000000),
           scaffoldBackground: const Color(0xFF000000),
           subThemesData: _subThemes,
-        ).copyWith(
-          colorScheme: const ColorScheme.highContrastDark(
-            primary: Color(0xFF99F6E4),
-            secondary: Color(0xFFBFDBFE),
-          ),
         ),
         Brightness.dark,
       );

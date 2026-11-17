@@ -1,4 +1,4 @@
-﻿// Interface NotificationScheduler trừu tượng hóa việc lập lịch thông báo cục bộ.
+// Interface NotificationScheduler trừu tượng hóa việc lập lịch thông báo cục bộ.
 
 import '../entities/reminder.dart';
 

@@ -1,4 +1,4 @@
-﻿// Màn hình thêm và chỉnh sửa nhắc nhở với đầy đủ 4 loại và 4 kiểu lặp.
+// Màn hình thêm và chỉnh sửa nhắc nhở với đầy đủ 4 loại và 4 kiểu lặp.
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

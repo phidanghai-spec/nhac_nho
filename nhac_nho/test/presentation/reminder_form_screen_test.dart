@@ -1,4 +1,4 @@
-﻿// Widget test cho ReminderFormScreen (kiểm tra validation mục 6.5).
+// Widget test cho ReminderFormScreen (kiểm tra validation mục 6.5).
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

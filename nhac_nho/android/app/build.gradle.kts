@@ -7,7 +7,6 @@ plugins {
 android {
     namespace = "com.phidang.nhac_nho"
     compileSdk = 37
-    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true

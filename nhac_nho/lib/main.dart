@@ -1,4 +1,4 @@
-﻿// Điểm khởi chạy ứng dụng Nhắc Nhở.
+// Điểm khởi chạy ứng dụng Nhắc Nhở.
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

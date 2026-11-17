@@ -206,4 +206,130 @@ void main() {
       ).called(1);
     }
   });
+
+  test('scheduleSnooze đặt lịch hoãn 10 phút vào slot 99 (reminderId * 100 + 99)', () async {
+    await scheduler.scheduleSnooze(
+      reminderId: 9,
+      title: 'Uống nước',
+      categoryId: 'hydration',
+    );
+
+    verify(
+      () => mockPlugin.zonedSchedule(
+        id: 999,
+        title: 'Nhắc lại: Uống nước',
+        body: 'Đã hoãn 10 phút',
+        scheduledDate: any(named: 'scheduledDate'),
+        notificationDetails: any(named: 'notificationDetails'),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: null,
+        payload: 'reminder:9:hydration:Uống nước',
+      ),
+    ).called(1);
+  });
+
+  test('scheduleReminder kiểu once chỉ đặt lịch khi mốc giờ ở tương lai', () async {
+    const pastOnce = Reminder(
+      id: 11,
+      title: 'Nhắc cũ',
+      category: ReminderCategory.task,
+      isRoutine: false,
+      hour: 6,
+      minute: 0,
+      repeat: RepeatType.once,
+      date: '2026-11-17', // nowProvider = 07:00 => đã qua
+      createdAt: '2026-11-17T00:00:00Z',
+    );
+    await scheduler.scheduleReminder(pastOnce);
+    verifyNever(
+      () => mockPlugin.zonedSchedule(
+        id: 1100,
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        scheduledDate: any(named: 'scheduledDate'),
+        notificationDetails: any(named: 'notificationDetails'),
+        androidScheduleMode: any(named: 'androidScheduleMode'),
+        matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+        payload: any(named: 'payload'),
+      ),
+    );
+
+    const futureOnce = Reminder(
+      id: 12,
+      title: 'Họp chiều',
+      category: ReminderCategory.task,
+      isRoutine: false,
+      hour: 15,
+      minute: 0,
+      repeat: RepeatType.once,
+      date: '2026-11-17',
+      createdAt: '2026-11-17T00:00:00Z',
+    );
+    await scheduler.scheduleReminder(futureOnce);
+    verify(
+      () => mockPlugin.zonedSchedule(
+        id: 1200,
+        title: 'Họp chiều',
+        body: any(named: 'body'),
+        scheduledDate: any(named: 'scheduledDate'),
+        notificationDetails: any(named: 'notificationDetails'),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: null,
+        payload: 'reminder:12:task:Họp chiều',
+      ),
+    ).called(1);
+  });
+
+  test('rescheduleAll bỏ qua nhắc đang tắt (enabled = false)', () async {
+    const enabledR = Reminder(
+      id: 1,
+      title: 'Bật',
+      category: ReminderCategory.meal,
+      isRoutine: true,
+      hour: 12,
+      minute: 0,
+      repeat: RepeatType.daily,
+      enabled: true,
+      createdAt: '2026-11-17T00:00:00Z',
+    );
+    const disabledR = Reminder(
+      id: 2,
+      title: 'Tắt',
+      category: ReminderCategory.meal,
+      isRoutine: true,
+      hour: 18,
+      minute: 0,
+      repeat: RepeatType.daily,
+      enabled: false,
+      createdAt: '2026-11-17T00:00:00Z',
+    );
+
+    await scheduler.rescheduleAll([enabledR, disabledR]);
+
+    verify(() => mockPlugin.cancelAllPendingNotifications()).called(1);
+    verify(
+      () => mockPlugin.zonedSchedule(
+        id: 100,
+        title: 'Bật',
+        body: any(named: 'body'),
+        scheduledDate: any(named: 'scheduledDate'),
+        notificationDetails: any(named: 'notificationDetails'),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: any(named: 'payload'),
+      ),
+    ).called(1);
+    verifyNever(
+      () => mockPlugin.zonedSchedule(
+        id: 200,
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        scheduledDate: any(named: 'scheduledDate'),
+        notificationDetails: any(named: 'notificationDetails'),
+        androidScheduleMode: any(named: 'androidScheduleMode'),
+        matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+        payload: any(named: 'payload'),
+      ),
+    );
+  });
 }

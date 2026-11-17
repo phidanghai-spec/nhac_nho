@@ -101,6 +101,22 @@ class ReminderRepositoryImpl implements ReminderRepository {
   }
 
   @override
+  Future<void> replaceRoutineReminders(List<Reminder> routines) async {
+    final db = await _appDatabase.database;
+    await db.transaction((txn) async {
+      await txn.delete(
+        AppDatabase.remindersTable,
+        where: 'isRoutine = ?',
+        whereArgs: [1],
+      );
+      for (final reminder in routines) {
+        final map = reminder.copyWith(isRoutine: true).toMap()..remove('id');
+        await txn.insert(AppDatabase.remindersTable, map);
+      }
+    });
+  }
+
+  @override
   Future<int> upsertCompletionLog(CompletionLog log) async {
     final db = await _appDatabase.database;
     final existing = await db.query(

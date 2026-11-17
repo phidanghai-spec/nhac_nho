@@ -191,4 +191,35 @@ void main() {
     final afterDelete = await repository.getCompletionLogsByDate('2026-11-17');
     expect(afterDelete, isEmpty);
   });
+
+  test('replaceRoutineReminders giữ nguyên công việc (isRoutine=false) và completion logs của chúng', () async {
+    final taskId = await repository.insertReminder(
+      buildReminder(title: 'Việc quan trọng', isRoutine: false),
+    );
+    await repository.insertReminder(
+      buildReminder(title: 'Bữa sáng cũ', isRoutine: true),
+    );
+    await repository.upsertCompletionLog(
+      CompletionLog(
+        reminderId: taskId,
+        date: '2026-11-17',
+        status: CompletionStatus.done,
+        completedAt: '2026-11-17T09:00:00.000Z',
+      ),
+    );
+
+    await repository.replaceRoutineReminders([
+      buildReminder(title: 'Bữa sáng mới', isRoutine: true, hour: 7),
+    ]);
+
+    final all = await repository.getAllReminders();
+    expect(all.map((e) => e.title), containsAll(['Việc quan trọng', 'Bữa sáng mới']));
+    expect(all.any((e) => e.title == 'Bữa sáng cũ'), isFalse);
+
+    final keptTask = await repository.getReminderById(taskId);
+    expect(keptTask, isNotNull);
+    final logs = await repository.getCompletionLogsByDate('2026-11-17');
+    expect(logs, hasLength(1));
+    expect(logs.first.reminderId, taskId);
+  });
 }

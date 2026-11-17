@@ -1,4 +1,4 @@
-﻿// Tiện ích tính nextInstanceOf, intervalSlots và định dạng giờ 24h.
+// Tiện ích tính nextInstanceOf, intervalSlots và định dạng giờ 24h.
 
 import 'package:timezone/timezone.dart' as tz;
 

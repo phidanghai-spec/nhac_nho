@@ -1,4 +1,4 @@
-﻿// Unit test cho SleepPlanner (mục 6.3).
+// Unit test cho SleepPlanner (mục 6.3).
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nhac_nho/domain/logic/sleep_planner.dart';

@@ -1,4 +1,4 @@
-﻿// Unit test cho ReminderController với mocktail.
+// Unit test cho ReminderController với mocktail.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

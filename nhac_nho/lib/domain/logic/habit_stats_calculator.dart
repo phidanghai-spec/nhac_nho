@@ -1,4 +1,4 @@
-﻿// Logic thuần Dart tính chuỗi ngày duy trì (Streak) và tỷ lệ hoàn thành 7 ngày.
+// Logic thuần Dart tính chuỗi ngày duy trì (Streak) và tỷ lệ hoàn thành 7 ngày.
 
 import '../entities/completion_log.dart';
 import '../entities/reminder.dart';

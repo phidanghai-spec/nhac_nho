@@ -1,4 +1,4 @@
-﻿// Controller quản lý trạng thái danh sách nhắc nhở và điều phối rescheduleAll.
+// Controller quản lý trạng thái danh sách nhắc nhở và điều phối rescheduleAll.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -72,7 +72,7 @@ class ReminderController extends AsyncNotifier<ReminderState> {
     final now = _now();
     final todayKey = HabitStatsCalculator.formatDateKey(now);
     final startKey = HabitStatsCalculator.formatDateKey(
-      now.subtract(const Duration(days: 60)),
+      now.subtract(const Duration(days: 365)),
     );
 
     final all = await reminderRepo.getAllReminders();
@@ -227,22 +227,13 @@ class ReminderController extends AsyncNotifier<ReminderState> {
     await settingsRepo.saveBodyProfile(profile);
     await settingsRepo.setOnboardingCompleted(true);
 
-    final existingAll = await reminderRepo.getAllReminders();
-    final keptWorkTasks = existingAll
-        .where((r) => !r.isRoutine)
-        .map((r) => r.copyWith(clearId: true))
-        .toList();
-
     final personalizedRoutines = WorkMealGuide.buildPersonalizedRoutineReminders(
       settings: settings,
       profile: profile,
       createdAt: _now().toIso8601String(),
     );
 
-    await reminderRepo.replaceAllReminders([
-      ...personalizedRoutines,
-      ...keptWorkTasks,
-    ]);
+    await reminderRepo.replaceRoutineReminders(personalizedRoutines);
     ref.invalidate(userSettingsProvider);
     ref.invalidate(bodyProfileProvider);
     await _refreshAndReschedule();
@@ -255,5 +246,6 @@ class ReminderController extends AsyncNotifier<ReminderState> {
     try {
       await scheduler.rescheduleAll(all);
     } catch (_) {}
+    state = AsyncData(await _loadState());
   }
 }

@@ -1,4 +1,4 @@
-﻿// Widget test kiểm tra HomeScreen không tràn (overflow) ở textScaler = 2.0 và cả theme sáng/tối.
+// Widget test kiểm tra HomeScreen không tràn (overflow) ở textScaler = 2.0 và cả theme sáng/tối.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +14,8 @@ import 'package:nhac_nho/domain/repositories/reminder_repository.dart';
 import 'package:nhac_nho/domain/repositories/settings_repository.dart';
 import 'package:nhac_nho/domain/services/notification_scheduler.dart';
 import 'package:nhac_nho/presentation/screens/home_screen.dart';
+import 'package:nhac_nho/presentation/screens/sleep_planner_screen.dart';
+import 'package:nhac_nho/presentation/screens/stats_screen.dart';
 import 'package:nhac_nho/presentation/theme/app_theme.dart';
 
 class MockReminderRepository extends Mock implements ReminderRepository {}
@@ -132,5 +134,70 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(find.textContaining('Bữa sáng'), findsOneWidget);
+  });
+
+  testWidgets('StatsScreen và SleepPlannerScreen không overflow với textScaler = 2.0 và highContrast', (tester) async {
+    final reminderRepo = MockReminderRepository();
+    final settingsRepo = MockSettingsRepository();
+    final scheduler = MockNotificationScheduler();
+
+    when(() => reminderRepo.getAllReminders())
+        .thenAnswer((_) async => sampleReminders);
+    when(() => reminderRepo.getCompletionLogsByDate(any()))
+        .thenAnswer((_) async => []);
+    when(() => reminderRepo.getCompletionLogsInRange(any(), any()))
+        .thenAnswer((_) async => []);
+    when(() => settingsRepo.getUserSettings())
+        .thenAnswer((_) async => const UserSettings());
+    when(() => settingsRepo.getBodyProfile())
+        .thenAnswer((_) async => const BodyProfile());
+    when(() => settingsRepo.hasCompletedOnboarding())
+        .thenAnswer((_) async => true);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          reminderRepositoryProvider.overrideWithValue(reminderRepo),
+          settingsRepositoryProvider.overrideWithValue(settingsRepo),
+          notificationSchedulerProvider.overrideWithValue(scheduler),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(highContrast: true),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(2.0),
+              highContrast: true,
+            ),
+            child: child!,
+          ),
+          home: const StatsScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          reminderRepositoryProvider.overrideWithValue(reminderRepo),
+          settingsRepositoryProvider.overrideWithValue(settingsRepo),
+          notificationSchedulerProvider.overrideWithValue(scheduler),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.dark(highContrast: true),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(2.0),
+              highContrast: true,
+            ),
+            child: child!,
+          ),
+          home: const SleepPlannerScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }

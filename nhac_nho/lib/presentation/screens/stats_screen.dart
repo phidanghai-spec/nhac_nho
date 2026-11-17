@@ -112,50 +112,63 @@ class _SevenDayChartCard extends StatelessWidget {
           children: [
             Text(title, style: theme.textTheme.titleMedium),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 180,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: entries.map((e) {
-                  final percent = (e.value * 100).round();
-                  final barHeight = (e.value.clamp(0.0, 1.0) * 110).toDouble();
-                  return Expanded(
-                    child: Semantics(
-                      label: 'Ngày ${_shortDayLabel(e.key)}: $percent phần trăm',
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: entries.map((e) {
+                final percent = (e.value * 100).round();
+                final barHeight = (e.value.clamp(0.0, 1.0) * 100).toDouble();
+                return Expanded(
+                  child: Semantics(
+                    label: 'Ngày ${_shortDayLabel(e.key)}: $percent phần trăm',
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
                               '$percent%',
+                              maxLines: 1,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Container(
-                              height: barHeight < 6 ? 6 : barHeight,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: e.value > 0
-                                    ? barColor
-                                    : theme.colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(6),
+                          ),
+                          const SizedBox(height: 4),
+                          SizedBox(
+                            height: 104,
+                            child: Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Container(
+                                height: barHeight < 6 ? 6 : barHeight,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: e.value > 0
+                                      ? barColor
+                                      : theme.colorScheme
+                                          .surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
+                          ),
+                          const SizedBox(height: 6),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
                               _shortDayLabel(e.key),
+                              maxLines: 1,
                               style: theme.textTheme.bodySmall,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),

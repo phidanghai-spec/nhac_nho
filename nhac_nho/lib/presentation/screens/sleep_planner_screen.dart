@@ -23,7 +23,8 @@ class _SleepPlannerScreenState extends ConsumerState<SleepPlannerScreen> {
   final _heightCtrl = TextEditingController(text: '168');
   final _weightCtrl = TextEditingController(text: '62');
 
-  bool _initializedFromRepo = false;
+  UserSettings? _lastSyncedSettings;
+  BodyProfile? _lastSyncedProfile;
   UserSettings _settings = const UserSettings();
   BodyProfile _profile = const BodyProfile();
   bool _applying = false;
@@ -37,13 +38,17 @@ class _SleepPlannerScreenState extends ConsumerState<SleepPlannerScreen> {
   }
 
   void _syncInitial(UserSettings settings, BodyProfile profile) {
-    if (_initializedFromRepo) return;
-    _initializedFromRepo = true;
-    _settings = settings;
-    _profile = profile;
-    _ageCtrl.text = profile.age.toString();
-    _heightCtrl.text = profile.heightCm.toStringAsFixed(0);
-    _weightCtrl.text = profile.weightKg.toStringAsFixed(1);
+    if (_lastSyncedSettings != settings) {
+      _lastSyncedSettings = settings;
+      _settings = settings;
+    }
+    if (_lastSyncedProfile != profile) {
+      _lastSyncedProfile = profile;
+      _profile = profile;
+      _ageCtrl.text = profile.age.toString();
+      _heightCtrl.text = profile.heightCm.toStringAsFixed(0);
+      _weightCtrl.text = profile.weightKg.toStringAsFixed(1);
+    }
   }
 
   BodyProfile get _currentProfile {
@@ -211,44 +216,59 @@ class _SleepPlannerScreenState extends ConsumerState<SleepPlannerScreen> {
                           if (sleepPlan.sleepDurationWarning != null)
                             _WarningBanner(message: sleepPlan.sleepDurationWarning!),
                           const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _ageCtrl,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (_) => setState(() {}),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Tuổi',
-                                    border: OutlineInputBorder(),
-                                  ),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final largeText =
+                                  MediaQuery.textScalerOf(context).scale(1) >=
+                                      1.5;
+                              final ageField = TextField(
+                                controller: _ageCtrl,
+                                keyboardType: TextInputType.number,
+                                onChanged: (_) => setState(() {}),
+                                decoration: const InputDecoration(
+                                  labelText: 'Tuổi',
+                                  border: OutlineInputBorder(),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: TextField(
-                                  controller: _heightCtrl,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (_) => setState(() {}),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Cao (cm)',
-                                    border: OutlineInputBorder(),
-                                  ),
+                              );
+                              final heightField = TextField(
+                                controller: _heightCtrl,
+                                keyboardType: TextInputType.number,
+                                onChanged: (_) => setState(() {}),
+                                decoration: const InputDecoration(
+                                  labelText: 'Cao (cm)',
+                                  border: OutlineInputBorder(),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: TextField(
-                                  controller: _weightCtrl,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (_) => setState(() {}),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Nặng (kg)',
-                                    border: OutlineInputBorder(),
-                                  ),
+                              );
+                              final weightField = TextField(
+                                controller: _weightCtrl,
+                                keyboardType: TextInputType.number,
+                                onChanged: (_) => setState(() {}),
+                                decoration: const InputDecoration(
+                                  labelText: 'Nặng (kg)',
+                                  border: OutlineInputBorder(),
                                 ),
-                              ),
-                            ],
+                              );
+                              if (largeText || constraints.maxWidth < 340) {
+                                return Column(
+                                  children: [
+                                    ageField,
+                                    const SizedBox(height: 10),
+                                    heightField,
+                                    const SizedBox(height: 10),
+                                    weightField,
+                                  ],
+                                );
+                              }
+                              return Row(
+                                children: [
+                                  Expanded(child: ageField),
+                                  const SizedBox(width: 10),
+                                  Expanded(child: heightField),
+                                  const SizedBox(width: 10),
+                                  Expanded(child: weightField),
+                                ],
+                              );
+                            },
                           ),
                           const SizedBox(height: 12),
                           _EnumChips<Gender>(
@@ -455,27 +475,42 @@ class _SleepPlannerScreenState extends ConsumerState<SleepPlannerScreen> {
                   ...plan.mealScheduleRecommendations.map(
                     (meal) => Card(
                       margin: const EdgeInsets.only(bottom: 10),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        leading: CircleAvatar(
-                          child: Text(
-                            TimeUtils.format24h(meal.hour, meal.minute),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 4,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    TimeUtils.format24h(meal.hour, meal.minute),
+                                    style: theme.textTheme.labelLarge?.copyWith(
+                                      color:
+                                          theme.colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  meal.title,
+                                  style: theme.textTheme.titleMedium,
+                                ),
+                              ],
                             ),
-                          ),
-                        ),
-                        title: Text(
-                          meal.title,
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(meal.foodAdvice),
+                            const SizedBox(height: 6),
+                            Text(meal.foodAdvice),
+                          ],
                         ),
                       ),
                     ),

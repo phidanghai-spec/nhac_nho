@@ -1,8 +1,9 @@
-﻿// Triển khai NotificationScheduler sử dụng flutter_local_notifications.
+// Triển khai NotificationScheduler sử dụng flutter_local_notifications.
 
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
@@ -14,6 +15,29 @@ import '../../domain/entities/reminder.dart';
 import '../../domain/services/notification_scheduler.dart';
 
 typedef TimezoneLookup = Future<String> Function();
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse response) {
+  if (response.actionId != NotificationSchedulerImpl.snoozeActionId) return;
+  final payload = response.payload ?? '';
+  if (!payload.startsWith('reminder:')) return;
+  final parts = payload.split(':');
+  if (parts.length < 4) return;
+  final reminderId = int.tryParse(parts[1]);
+  final categoryId = parts[2];
+  final title = parts.sublist(3).join(':');
+  if (reminderId == null) return;
+
+  final scheduler = NotificationSchedulerImpl();
+  unawaited(
+    scheduler.scheduleSnooze(
+      reminderId: reminderId,
+      title: title,
+      body: 'Đã hoãn 10 phút',
+      categoryId: categoryId,
+    ),
+  );
+}
 
 class NotificationSchedulerImpl implements NotificationScheduler {
   NotificationSchedulerImpl({
@@ -36,17 +60,21 @@ class NotificationSchedulerImpl implements NotificationScheduler {
     return info.identifier;
   }
 
-  @override
-  Future<void> init() async {
-    if (_initialized) return;
-
-    tz_data.initializeTimeZones();
+  Future<void> _refreshTimezone() async {
     try {
       final zoneName = await _timezoneLookup();
       tz.setLocalLocation(tz.getLocation(zoneName));
     } catch (_) {
       tz.setLocalLocation(tz.getLocation('Asia/Ho_Chi_Minh'));
     }
+  }
+
+  @override
+  Future<void> init() async {
+    if (_initialized) return;
+
+    tz_data.initializeTimeZones();
+    await _refreshTimezone();
 
     const androidInit = AndroidInitializationSettings('ic_notification');
     const iosInit = DarwinInitializationSettings(
@@ -61,6 +89,7 @@ class NotificationSchedulerImpl implements NotificationScheduler {
         iOS: iosInit,
       ),
       onDidReceiveNotificationResponse: _onNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
@@ -92,7 +121,7 @@ class NotificationSchedulerImpl implements NotificationScheduler {
         NotificationChannelConfig.hydrationId,
         NotificationChannelConfig.hydrationName,
         description: NotificationChannelConfig.hydrationDescription,
-        importance: Importance.defaultImportance,
+        importance: Importance.high,
       ),
       AndroidNotificationChannel(
         NotificationChannelConfig.sleepId,
@@ -181,7 +210,7 @@ class NotificationSchedulerImpl implements NotificationScheduler {
     final entries = buildScheduleEntries(reminder, now: now);
 
     for (final entry in entries) {
-      await _plugin.zonedSchedule(
+      await _zonedScheduleWithFallback(
         id: entry.notificationId,
         title: reminder.title,
         body: (reminder.note != null && reminder.note!.isNotEmpty)
@@ -208,6 +237,7 @@ class NotificationSchedulerImpl implements NotificationScheduler {
   @override
   Future<void> rescheduleAll(List<Reminder> reminders) async {
     await init();
+    await _refreshTimezone();
     await _plugin.cancelAllPendingNotifications();
 
     final scheduleMode = await _resolveScheduleMode();
@@ -220,10 +250,14 @@ class NotificationSchedulerImpl implements NotificationScheduler {
     }
 
     allEntries.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
-    final capped = allEntries.take(AppLimits.maxScheduledWindowNotifications);
+    final isApple = defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
+    final entriesToSchedule = isApple
+        ? allEntries.take(AppLimits.maxScheduledWindowNotifications)
+        : allEntries;
 
-    for (final entry in capped) {
-      await _plugin.zonedSchedule(
+    for (final entry in entriesToSchedule) {
+      await _zonedScheduleWithFallback(
         id: entry.notificationId,
         title: entry.reminder.title,
         body: (entry.reminder.note != null && entry.reminder.note!.isNotEmpty)
@@ -253,7 +287,7 @@ class NotificationSchedulerImpl implements NotificationScheduler {
     final snoozeId =
         TimeUtils.notificationIdFor(reminderId, AppLimits.snoozeSlot);
 
-    await _plugin.zonedSchedule(
+    await _zonedScheduleWithFallback(
       id: snoozeId,
       title: 'Nhắc lại: $title',
       body: body ?? 'Đã hoãn 10 phút',
@@ -262,6 +296,45 @@ class NotificationSchedulerImpl implements NotificationScheduler {
       androidScheduleMode: scheduleMode,
       payload: 'reminder:$reminderId:$categoryId:$title',
     );
+  }
+
+  Future<void> _zonedScheduleWithFallback({
+    required int id,
+    required String title,
+    String? body,
+    required tz.TZDateTime scheduledDate,
+    required NotificationDetails notificationDetails,
+    required AndroidScheduleMode androidScheduleMode,
+    DateTimeComponents? matchDateTimeComponents,
+    String? payload,
+  }) async {
+    try {
+      await _plugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
+        androidScheduleMode: androidScheduleMode,
+        matchDateTimeComponents: matchDateTimeComponents,
+        payload: payload,
+      );
+    } on PlatformException {
+      if (androidScheduleMode == AndroidScheduleMode.exactAllowWhileIdle) {
+        await _plugin.zonedSchedule(
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: scheduledDate,
+          notificationDetails: notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: matchDateTimeComponents,
+          payload: payload,
+        );
+      } else {
+        rethrow;
+      }
+    }
   }
 
   Future<AndroidScheduleMode> _resolveScheduleMode() async {
@@ -361,7 +434,7 @@ class NotificationSchedulerImpl implements NotificationScheduler {
         final entries = <_ScheduledEntry>[];
         for (var bit = 0; bit < 7; bit++) {
           if ((reminder.weekdaysMask & (1 << bit)) == 0) continue;
-          final weekday = bit + 1; // 1 = Thứ 2 .. 7 = Chủ nhật
+          final weekday = bit + 1;
           entries.add(
             _ScheduledEntry(
               reminder: reminder,

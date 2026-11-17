@@ -1,4 +1,4 @@
-﻿// Widget thẻ nhắc nhở tối giản, vùng chạm >= 48dp, tách rõ Xong / Bỏ qua cho mọi lứa tuổi.
+// Widget thẻ nhắc nhở tối giản, vùng chạm >= 48dp, tách rõ Xong / Bỏ qua cho mọi lứa tuổi.
 
 import 'package:material_ui/material_ui.dart';
 
