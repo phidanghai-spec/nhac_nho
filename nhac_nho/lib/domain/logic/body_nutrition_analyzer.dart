@@ -394,9 +394,9 @@ class BodyNutritionAnalyzer {
     }
 
     if (isDinner) {
-      return '${prefix}Ưu tiên nhẹ bụng, dễ tiêu: $proteinFood kèm rau luộc/canh ấm, ít cơm; tránh đồ chiên rán hoặc quá no.';
+      return '$prefixƯu tiên nhẹ bụng, dễ tiêu: $proteinFood kèm rau luộc/canh ấm, ít cơm; tránh đồ chiên rán hoặc quá no.';
     }
-    return '${prefix}Đĩa ăn cân bằng: 1/2 rau xanh củ quả, 1/4 đạm ($proteinFood), 1/4 cơm gạo lứt/tinh bột chậm.';
+    return '$prefixĐĩa ăn cân bằng: 1/2 rau xanh củ quả, 1/4 đạm ($proteinFood), 1/4 cơm gạo lứt/tinh bột chậm.';
   }
 
   static String _stomachSnackAdvice(DietType dietType) {

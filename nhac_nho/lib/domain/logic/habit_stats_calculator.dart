@@ -66,7 +66,7 @@ class HabitStatsCalculator {
     return streak;
   }
 
-  /// Trả về Map<yyyy-MM-dd, double (0.0..1.0)> cho 7 ngày gần nhất (từ cũ đến mới).
+  /// Trả về `Map<yyyy-MM-dd, double>` (0.0..1.0) cho 7 ngày gần nhất (từ cũ đến mới).
   static Map<String, double> calculateLast7DaysRates({
     required List<Reminder> reminders,
     required List<CompletionLog> logs,
