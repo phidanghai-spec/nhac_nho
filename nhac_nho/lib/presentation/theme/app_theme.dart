@@ -101,13 +101,13 @@ class AppTheme {
   }
 
   static const FlexSubThemesData _subThemes = FlexSubThemesData(
-    defaultRadius: 12,
-    inputDecoratorRadius: 10,
-    cardRadius: 14,
-    elevatedButtonRadius: 12,
-    filledButtonRadius: 12,
-    outlinedButtonRadius: 12,
-    chipRadius: 10,
+    defaultRadius: 14,
+    inputDecoratorRadius: 12,
+    cardRadius: 20,
+    elevatedButtonRadius: 14,
+    filledButtonRadius: 14,
+    outlinedButtonRadius: 14,
+    chipRadius: 12,
     navigationBarIndicatorOpacity: 0.18,
   );
 
@@ -183,6 +183,16 @@ class AppTheme {
       ),
       floatingActionButtonTheme: base.floatingActionButtonTheme.copyWith(
         elevation: 2,
+      ),
+      cardTheme: base.cardTheme.copyWith(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: base.colorScheme.outlineVariant.withValues(alpha: 0.75),
+            width: 1,
+          ),
+        ),
       ),
       materialTapTargetSize: MaterialTapTargetSize.padded,
       visualDensity: VisualDensity.standard,

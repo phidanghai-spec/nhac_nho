@@ -16,6 +16,9 @@ class WorkMealGuide {
       officeCoderPreset(createdAt: stamp),
       studentPreset(createdAt: stamp),
       freelancerPreset(createdAt: stamp),
+      modelAestheticPreset(createdAt: stamp),
+      homemakerParentPreset(createdAt: stamp),
+      activeWorkerPreset(createdAt: stamp),
       seniorHealthPreset(createdAt: stamp),
     ];
   }
@@ -26,6 +29,9 @@ class WorkMealGuide {
       PresetId.officeCoder => officeCoderPreset(createdAt: stamp),
       PresetId.student => studentPreset(createdAt: stamp),
       PresetId.freelancer => freelancerPreset(createdAt: stamp),
+      PresetId.modelAesthetic => modelAestheticPreset(createdAt: stamp),
+      PresetId.homemakerParent => homemakerParentPreset(createdAt: stamp),
+      PresetId.activeWorker => activeWorkerPreset(createdAt: stamp),
       PresetId.seniorHealth => seniorHealthPreset(createdAt: stamp),
     };
   }
@@ -651,6 +657,348 @@ class WorkMealGuide {
           isRoutine: true,
           hour: 21,
           minute: 30,
+          createdAt: createdAt,
+        ),
+      ],
+    );
+  }
+
+  static PresetProfile modelAestheticPreset({required String createdAt}) {
+    const settings = UserSettings(
+      selectedPreset: 'model_aesthetic',
+      wakeTime: '06:30',
+      sleepHours: 8.0,
+      fallAsleepBufferMin: 15,
+      breakfastTime: '07:00',
+      lunchTime: '11:45',
+      afternoonSnackTime: '15:30',
+      dinnerTime: '18:00',
+      dinnerCutoffHours: 3.5,
+      caffeineCutoffHours: 8.0,
+      windDownMin: 45,
+      waterIntervalMin: 75,
+    );
+
+    return PresetProfile(
+      id: PresetId.modelAesthetic,
+      name: PresetId.modelAesthetic.displayName,
+      description:
+          'Ưu tiên thực đơn chống tích nước/đầy hơi, tập tạo dáng/pilates sáng và ngủ đủ 8h giữ sắc vóc.',
+      defaultSettings: settings,
+      reminders: [
+        _r(
+          title: 'Uống nước ấm & Giãn cơ sáng',
+          note: 'Uống 250ml nước ấm giảm phù nề buổi sáng và giãn cơ 10 phút.',
+          category: ReminderCategory.hydration,
+          isRoutine: true,
+          hour: 6,
+          minute: 35,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa sáng nhẹ bụng, ít muối',
+          note:
+              'Món gợi ý: 🥚 3 Lòng trắng + 1 Trứng · 🥒 Dưa leo · 🫐 Quả mọng\nGiàu đạm, ít natri giúp gương mặt gọn nét trước giờ làm việc.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 7,
+          minute: 0,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Lịch tập luyện / Tạo dáng / Chuẩn bị sự kiện',
+          note: 'Tập trung form dáng, cardio nhẹ hoặc chuẩn bị trang phục.',
+          category: ReminderCategory.task,
+          isRoutine: false,
+          priority: 1,
+          hour: 9,
+          minute: 0,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Uống nước đều đặn giữ ẩm da',
+          note: 'Uống 180–200ml nước mỗi 75 phút, hạn chế nước ngọt có ga.',
+          category: ReminderCategory.hydration,
+          isRoutine: true,
+          hour: 8,
+          minute: 0,
+          repeat: RepeatType.interval,
+          intervalMinutes: 75,
+          endHour: 19,
+          endMinute: 30,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa trưa sạch, chống đầy hơi',
+          note:
+              'Món gợi ý: 🍗 150g Ức gà hấp gừng · 🥗 Măng tây / Rau luộc · 🍠 1/2 Khoai\nKhông dầu mỡ, tránh đồ sinh khí trước sự kiện chiều.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 11,
+          minute: 45,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa phụ chiều nhẹ',
+          note:
+              'Món gợi ý: 🥒 Dưa leo & cần tây · 🥛 Sữa chua không đường\nGiữ tỉnh táo mà không nặng bụng.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 15,
+          minute: 30,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa tối nhạt muối, dễ tiêu',
+          note:
+              'Món gợi ý: 🐟 Cá hấp gừng · 🥬 Rau cải luộc nhạt · 🥣 Canh bí đao\nKết thúc sớm để sáng hôm sau không phù nề.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 18,
+          minute: 0,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Chăm sóc da & Chuẩn bị ngủ',
+          note: 'Rời màn hình trước ngủ 45 phút, thư giãn cơ mặt và cổ.',
+          category: ReminderCategory.sleep,
+          isRoutine: true,
+          hour: 21,
+          minute: 30,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Đi ngủ đúng giờ (Đủ 8 tiếng)',
+          note: 'Ngủ lúc 22:15 giúp phục hồi da và giữ năng lượng rạng rỡ.',
+          category: ReminderCategory.sleep,
+          isRoutine: true,
+          hour: 22,
+          minute: 15,
+          createdAt: createdAt,
+        ),
+      ],
+    );
+  }
+
+  static PresetProfile homemakerParentPreset({required String createdAt}) {
+    const settings = UserSettings(
+      selectedPreset: 'homemaker_parent',
+      wakeTime: '06:00',
+      sleepHours: 7.5,
+      fallAsleepBufferMin: 15,
+      breakfastTime: '07:00',
+      lunchTime: '11:45',
+      afternoonSnackTime: '15:30',
+      dinnerTime: '18:30',
+      dinnerCutoffHours: 3.0,
+      caffeineCutoffHours: 8.0,
+      windDownMin: 45,
+      waterIntervalMin: 105,
+    );
+
+    return PresetProfile(
+      id: PresetId.homemakerParent,
+      name: PresetId.homemakerParent.displayName,
+      description:
+          'Nhịp gia đình: đưa đón con, đi chợ nấu cơm nhà, nghỉ trưa hồi sức và nhắc uống nước giữa lúc bận việc nhà.',
+      defaultSettings: settings,
+      reminders: [
+        _r(
+          title: 'Uống nước ấm & Chuẩn bị bữa sáng gia đình',
+          note: 'Uống 250ml nước ấm trước khi bắt đầu việc nhà.',
+          category: ReminderCategory.hydration,
+          isRoutine: true,
+          hour: 6,
+          minute: 5,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa sáng gọn nhẹ đủ chất',
+          note:
+              'Món gợi ý: 🥚 2 Trứng ốp la · 🥖 Bánh mì nguyên cám · 🍅 Cà chua\nĂn đủ đạm để không mệt giữa buổi.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 7,
+          minute: 0,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Đi chợ / Mua thực phẩm & Việc trọng tâm sáng',
+          note: 'Hoàn thành việc cần ra ngoài hoặc dọn dẹp chính khi trời mát.',
+          category: ReminderCategory.task,
+          isRoutine: false,
+          priority: 1,
+          hour: 8,
+          minute: 30,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Uống nước & Nghỉ tay 5 phút',
+          note: 'Nhắc nhẹ mỗi 105 phút để không quên uống nước khi chăm gia đình.',
+          category: ReminderCategory.hydration,
+          isRoutine: true,
+          hour: 8,
+          minute: 0,
+          repeat: RepeatType.interval,
+          intervalMinutes: 105,
+          endHour: 20,
+          endMinute: 0,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa trưa cơm nhà cân bằng',
+          note:
+              'Món gợi ý: 🐟 Cá kho nhạt · 🥬 Rau củ luộc · 🍚 Cơm vừa phải\nTránh ăn vội hoặc ăn đồ thừa nguội lạnh.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 11,
+          minute: 45,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Nghỉ trưa hồi sức 25 phút',
+          note: 'Chợp mắt ngắn giúp giảm đau lưng và giữ tinh thần thoải mái.',
+          category: ReminderCategory.sleep,
+          isRoutine: true,
+          hour: 12,
+          minute: 45,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Đón con / Chuẩn bị bữa tối gia đình',
+          note: 'Sắp xếp khung chiều ổn định, kết hợp đi bộ nhẹ.',
+          category: ReminderCategory.task,
+          isRoutine: false,
+          priority: 2,
+          hour: 16,
+          minute: 30,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa tối ấm áp, dễ tiêu',
+          note:
+              'Món gợi ý: 🍲 Canh rau thịt băm · 🧈 Đậu phụ · 🍚 Ít cơm\nKết thúc bữa tối trước ngủ 3 giờ.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 18,
+          minute: 30,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Thư giãn & Đi ngủ đúng giờ',
+          note: 'Giãn cơ vai gáy 10 phút và đi ngủ lúc 22:15.',
+          category: ReminderCategory.sleep,
+          isRoutine: true,
+          hour: 22,
+          minute: 15,
+          createdAt: createdAt,
+        ),
+      ],
+    );
+  }
+
+  static PresetProfile activeWorkerPreset({required String createdAt}) {
+    const settings = UserSettings(
+      selectedPreset: 'active_worker',
+      wakeTime: '05:45',
+      sleepHours: 7.5,
+      fallAsleepBufferMin: 15,
+      breakfastTime: '06:15',
+      lunchTime: '11:45',
+      afternoonSnackTime: '15:30',
+      dinnerTime: '18:30',
+      dinnerCutoffHours: 3.0,
+      caffeineCutoffHours: 8.0,
+      windDownMin: 45,
+      waterIntervalMin: 75,
+    );
+
+    return PresetProfile(
+      id: PresetId.activeWorker,
+      name: PresetId.activeWorker.displayName,
+      description:
+          'Dành cho tài xế, giao hàng, kỹ thuật viên: thực đơn bền sức, bù nước thường xuyên mỗi 75p và giãn cơ chống mỏi.',
+      defaultSettings: settings,
+      reminders: [
+        _r(
+          title: 'Uống nước ấm & Kiểm tra hành trang',
+          note: 'Uống 300ml nước trước khi lên đường/vào ca.',
+          category: ReminderCategory.hydration,
+          isRoutine: true,
+          hour: 5,
+          minute: 50,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa sáng bền sức',
+          note:
+              'Món gợi ý: 🍜 Phở / Bún ít mỡ · 🥚 1 Trứng chần · 🥬 Thêm rau\nĐủ năng lượng 4–5 giờ di chuyển liên tục.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 6,
+          minute: 15,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Ca làm việc sáng (Tập trung an toàn)',
+          note: 'Ưu tiên các chuyến/đầu việc quan trọng buổi sáng.',
+          category: ReminderCategory.task,
+          isRoutine: false,
+          priority: 1,
+          hour: 7,
+          minute: 0,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bù nước & Vận động vai gáy (Mỗi 75p)',
+          note: 'Uống 200ml nước, xoay cổ vai lưng tránh đau cột sống.',
+          category: ReminderCategory.hydration,
+          isRoutine: true,
+          hour: 7,
+          minute: 30,
+          repeat: RepeatType.interval,
+          intervalMinutes: 75,
+          endHour: 19,
+          endMinute: 30,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa trưa nạp sức & Nghỉ ngắn',
+          note:
+              'Món gợi ý: 🍗 Cơm thịt nạc / Đùi gà bỏ da · 🥬 Canh rau · 🍚 1.5 chén cơm\nNghỉ mắt 15–20 phút trước ca chiều.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 11,
+          minute: 45,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa phụ chống tụt đường huyết',
+          note:
+              'Món gợi ý: 🍌 1 Quả chuối · 🥜 1 nắm lạc rang\nNhanh gọn, tiện mang theo khi di chuyển.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 15,
+          minute: 30,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Bữa tối phục hồi cơ bắp',
+          note:
+              'Món gợi ý: 🐟 Cá / Thịt rim nhạt · 🥬 Rau luộc · 🥣 Canh ấm\nĂn đủ chất, hạn chế rượu bia để ngủ sâu.',
+          category: ReminderCategory.meal,
+          isRoutine: true,
+          hour: 18,
+          minute: 30,
+          createdAt: createdAt,
+        ),
+        _r(
+          title: 'Đi ngủ đúng giờ',
+          note: 'Lên giường lúc 22:00 để tỉnh táo và an toàn cho ngày mai.',
+          category: ReminderCategory.sleep,
+          isRoutine: true,
+          hour: 22,
+          minute: 0,
           createdAt: createdAt,
         ),
       ],

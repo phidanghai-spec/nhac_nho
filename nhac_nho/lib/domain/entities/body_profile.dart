@@ -82,6 +82,24 @@ enum WorkShift {
   }
 }
 
+enum DailyFocusMode {
+  brainFocus('Tỉnh táo trí não'),
+  staminaPhysical('Bền sức / Vận động'),
+  leanAntiBloat('Nhẹ bụng / Giữ dáng'),
+  digestiveComfort('Êm dịu tiêu hóa'),
+  quickBudget('Nhanh gọn & Tiết kiệm');
+
+  const DailyFocusMode(this.displayName);
+  final String displayName;
+
+  static DailyFocusMode fromString(String value) {
+    return DailyFocusMode.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => DailyFocusMode.brainFocus,
+    );
+  }
+}
+
 class BodyProfile {
   const BodyProfile({
     this.age = 25,
@@ -93,6 +111,7 @@ class BodyProfile {
     this.condition = HealthCondition.none,
     this.dietType = DietType.omnivore,
     this.workShift = WorkShift.dayShift,
+    this.dailyFocusMode = DailyFocusMode.brainFocus,
     this.isGymGoer = false,
     this.workoutHour = 17,
     this.workoutMinute = 0,
@@ -107,6 +126,7 @@ class BodyProfile {
   final HealthCondition condition;
   final DietType dietType;
   final WorkShift workShift;
+  final DailyFocusMode dailyFocusMode;
   final bool isGymGoer;
   final int workoutHour;
   final int workoutMinute;
@@ -121,6 +141,7 @@ class BodyProfile {
     HealthCondition? condition,
     DietType? dietType,
     WorkShift? workShift,
+    DailyFocusMode? dailyFocusMode,
     bool? isGymGoer,
     int? workoutHour,
     int? workoutMinute,
@@ -135,6 +156,7 @@ class BodyProfile {
       condition: condition ?? this.condition,
       dietType: dietType ?? this.dietType,
       workShift: workShift ?? this.workShift,
+      dailyFocusMode: dailyFocusMode ?? this.dailyFocusMode,
       isGymGoer: isGymGoer ?? this.isGymGoer,
       workoutHour: workoutHour ?? this.workoutHour,
       workoutMinute: workoutMinute ?? this.workoutMinute,
@@ -152,6 +174,7 @@ class BodyProfile {
       'condition': condition.name,
       'dietType': dietType.name,
       'workShift': workShift.name,
+      'dailyFocusMode': dailyFocusMode.name,
       'isGymGoer': isGymGoer,
       'workoutHour': workoutHour,
       'workoutMinute': workoutMinute,
@@ -175,6 +198,9 @@ class BodyProfile {
       workShift: WorkShift.fromString(
         map['workShift'] as String? ?? 'dayShift',
       ),
+      dailyFocusMode: DailyFocusMode.fromString(
+        map['dailyFocusMode'] as String? ?? 'brainFocus',
+      ),
       isGymGoer: map['isGymGoer'] as bool? ?? false,
       workoutHour: map['workoutHour'] as int? ?? 17,
       workoutMinute: map['workoutMinute'] as int? ?? 0,
@@ -194,6 +220,7 @@ class BodyProfile {
         other.condition == condition &&
         other.dietType == dietType &&
         other.workShift == workShift &&
+        other.dailyFocusMode == dailyFocusMode &&
         other.isGymGoer == isGymGoer &&
         other.workoutHour == workoutHour &&
         other.workoutMinute == workoutMinute;
@@ -210,6 +237,7 @@ class BodyProfile {
     condition,
     dietType,
     workShift,
+    dailyFocusMode,
     isGymGoer,
     workoutHour,
     workoutMinute,

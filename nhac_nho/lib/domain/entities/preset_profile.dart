@@ -4,10 +4,13 @@ import 'reminder.dart';
 import 'user_settings.dart';
 
 enum PresetId {
-  officeCoder('office_coder', 'Dân văn phòng / Coder'),
+  officeCoder('office_coder', 'Văn phòng / IT'),
   student('student', 'Học sinh / Sinh viên'),
-  freelancer('freelancer', 'Người làm tự do (Freelancer)'),
-  seniorHealth('senior_health', 'Người lớn tuổi / Sức khỏe');
+  freelancer('freelancer', 'Tự do / Sáng tạo'),
+  modelAesthetic('model_aesthetic', 'Người mẫu / Giữ dáng / Sự kiện'),
+  homemakerParent('homemaker_parent', 'Nội trợ / Chăm sóc gia đình'),
+  activeWorker('active_worker', 'Tài xế / Lao động thể chất'),
+  seniorHealth('senior_health', 'Người lớn tuổi / Dưỡng sinh');
 
   const PresetId(this.id, this.displayName);
   final String id;

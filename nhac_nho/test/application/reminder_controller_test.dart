@@ -9,6 +9,9 @@ import 'package:nhac_nho/domain/entities/completion_log.dart';
 import 'package:nhac_nho/domain/entities/preset_profile.dart';
 import 'package:nhac_nho/domain/entities/reminder.dart';
 import 'package:nhac_nho/domain/entities/user_settings.dart';
+import 'package:nhac_nho/domain/entities/user_task_input.dart';
+import 'package:nhac_nho/domain/logic/adaptive_food_catalog.dart';
+import 'package:nhac_nho/domain/logic/universal_day_scheduler.dart';
 import 'package:nhac_nho/domain/repositories/reminder_repository.dart';
 import 'package:nhac_nho/domain/repositories/settings_repository.dart';
 import 'package:nhac_nho/domain/services/notification_scheduler.dart';
@@ -63,6 +66,9 @@ void main() {
     when(() => reminderRepo.deleteReminder(any())).thenAnswer((_) async {});
     when(() => reminderRepo.replaceAllReminders(any()))
         .thenAnswer((_) async {});
+    when(() => reminderRepo.replaceRoutineReminders(any()))
+        .thenAnswer((_) async {});
+    when(() => reminderRepo.updateReminder(any())).thenAnswer((_) async {});
     when(() => reminderRepo.upsertCompletionLog(any()))
         .thenAnswer((_) async => 1);
 
@@ -135,6 +141,67 @@ void main() {
 
     verify(() => scheduler.cancelReminder(42)).called(1);
     verify(() => reminderRepo.deleteReminder(42)).called(1);
+    verify(() => scheduler.rescheduleAll(any())).called(1);
+  });
+
+  test('applyUniversalDayPlan lưu hồ sơ, cập nhật thói quen & thêm việc mới', () async {
+    await container.read(reminderControllerProvider.future);
+    final controller = container.read(reminderControllerProvider.notifier);
+
+    const settings = UserSettings();
+    const profile = BodyProfile(dailyFocusMode: DailyFocusMode.brainFocus);
+    final plan = UniversalDayScheduler.schedule(
+      tasks: const [
+        UserTaskInput(
+          id: 't1',
+          title: 'Viết đặc tả kỹ thuật',
+          estimatedMinutes: 60,
+          energyDemand: TaskEnergyDemand.highFocus,
+        ),
+      ],
+      profile: profile,
+      settings: settings,
+    );
+
+    await controller.applyUniversalDayPlan(
+      plan: plan,
+      settings: settings,
+      profile: profile,
+    );
+
+    verify(() => settingsRepo.saveUserSettings(settings)).called(1);
+    verify(() => settingsRepo.saveBodyProfile(profile)).called(1);
+    verify(() => reminderRepo.replaceRoutineReminders(any())).called(1);
+    verify(() => reminderRepo.insertReminder(any())).called(greaterThanOrEqualTo(1));
+    verify(() => scheduler.rescheduleAll(any())).called(1);
+  });
+
+  test('swapMealReminderVariant cập nhật ghi chú món ăn mới và rescheduleAll', () async {
+    await container.read(reminderControllerProvider.future);
+    final controller = container.read(reminderControllerProvider.notifier);
+
+    const mealReminder = Reminder(
+      id: 10,
+      title: 'Bữa trưa cân bằng',
+      note: 'Món cũ',
+      category: ReminderCategory.meal,
+      isRoutine: true,
+      hour: 12,
+      minute: 0,
+      repeat: RepeatType.daily,
+      createdAt: '2026-11-18T00:00:00Z',
+    );
+
+    await controller.swapMealReminderVariant(
+      reminder: mealReminder,
+      profile: const BodyProfile(),
+      nextVariantIndex: 1,
+    );
+
+    final captured = verify(() => reminderRepo.updateReminder(captureAny())).captured;
+    final updated = captured.single as Reminder;
+    expect(updated.note, isNot('Món cũ'));
+    expect(AdaptiveFoodCatalog.parseFoodItemsFromNote(updated.note), isNotEmpty);
     verify(() => scheduler.rescheduleAll(any())).called(1);
   });
 }

@@ -1,5 +1,6 @@
 // Màu sắc đạt chuẩn WCAG AA (>= 4.5:1), icon và nhãn tiếng Việt cho 4 loại nhắc.
 
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../domain/entities/reminder.dart';
@@ -31,7 +32,7 @@ class CategoryStyle {
       case ReminderCategory.task:
         return CategoryVisual(
           label: 'Công việc',
-          icon: Icons.work_outline,
+          icon: LucideIcons.briefcase,
           foregroundColor: highContrast
               ? (isDark ? const Color(0xFFBFDBFE) : const Color(0xFF1E3A8A))
               : (isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E40AF)),
@@ -41,7 +42,7 @@ class CategoryStyle {
       case ReminderCategory.meal:
         return CategoryVisual(
           label: 'Ăn uống',
-          icon: Icons.restaurant_outlined,
+          icon: LucideIcons.utensils,
           foregroundColor: highContrast
               ? (isDark ? const Color(0xFFFDE68A) : const Color(0xFF78350F))
               : (isDark ? const Color(0xFFFCD34D) : const Color(0xFF9A3412)),
@@ -51,7 +52,7 @@ class CategoryStyle {
       case ReminderCategory.hydration:
         return CategoryVisual(
           label: 'Uống nước & Nghỉ',
-          icon: Icons.water_drop_outlined,
+          icon: LucideIcons.droplets,
           foregroundColor: highContrast
               ? (isDark ? const Color(0xFF99F6E4) : const Color(0xFF115E59))
               : (isDark ? const Color(0xFF5EEAD4) : const Color(0xFF0F766E)),
@@ -61,7 +62,7 @@ class CategoryStyle {
       case ReminderCategory.sleep:
         return CategoryVisual(
           label: 'Giấc ngủ',
-          icon: Icons.bedtime_outlined,
+          icon: LucideIcons.moon,
           foregroundColor: highContrast
               ? (isDark ? const Color(0xFFC7D2FE) : const Color(0xFF312E81))
               : (isDark ? const Color(0xFFA5B4FC) : const Color(0xFF4338CA)),

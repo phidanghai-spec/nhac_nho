@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nhac_nho/application/providers.dart';
 import 'package:nhac_nho/domain/entities/body_profile.dart';
 import 'package:nhac_nho/domain/entities/reminder.dart';
@@ -91,9 +92,13 @@ void main() {
     when(() => settingsRepo.hasCompletedOnboarding())
         .thenAnswer((_) async => true);
 
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
           reminderRepositoryProvider.overrideWithValue(reminderRepo),
           settingsRepositoryProvider.overrideWithValue(settingsRepo),
           notificationSchedulerProvider.overrideWithValue(scheduler),
@@ -122,6 +127,12 @@ void main() {
 
   testWidgets('HomeScreen không overflow với textScaler = 2.0 ở theme sáng', (tester) async {
     await pumpScaledHome(tester, brightness: Brightness.light);
+    await tester.scrollUntilVisible(
+      find.textContaining('Deep Work'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(find.textContaining('Deep Work'), findsOneWidget);
   });
@@ -156,9 +167,13 @@ void main() {
     when(() => settingsRepo.hasCompletedOnboarding())
         .thenAnswer((_) async => true);
 
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
           reminderRepositoryProvider.overrideWithValue(reminderRepo),
           settingsRepositoryProvider.overrideWithValue(settingsRepo),
           notificationSchedulerProvider.overrideWithValue(scheduler),
@@ -182,6 +197,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
           reminderRepositoryProvider.overrideWithValue(reminderRepo),
           settingsRepositoryProvider.overrideWithValue(settingsRepo),
           notificationSchedulerProvider.overrideWithValue(scheduler),

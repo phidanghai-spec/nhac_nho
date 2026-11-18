@@ -9,12 +9,15 @@ import 'package:nhac_nho/domain/logic/work_meal_guide.dart';
 
 void main() {
   group('WorkMealGuide Presets', () {
-    test('cung cấp đủ 4 bộ lịch mẫu với cả công việc và thói quen ăn/nước/ngủ', () {
+    test('cung cấp đủ 7 bộ lịch mẫu cho mọi nhóm đối tượng với đủ công việc và thói quen', () {
       final presets = WorkMealGuide.getAllPresets();
       expect(presets.map((p) => p.id), [
         PresetId.officeCoder,
         PresetId.student,
         PresetId.freelancer,
+        PresetId.modelAesthetic,
+        PresetId.homemakerParent,
+        PresetId.activeWorker,
         PresetId.seniorHealth,
       ]);
 

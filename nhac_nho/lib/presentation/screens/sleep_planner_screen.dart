@@ -1,12 +1,15 @@
 // Màn hình Thể trạng, Dinh dưỡng & Giấc ngủ.
 
-import 'package:material_ui/material_ui.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../application/providers.dart';
 import '../../core/constants.dart';
 import '../../core/time_utils.dart';
 import '../../domain/entities/body_profile.dart';
+import '../../domain/entities/nutrition_plan.dart';
 import '../../domain/entities/user_settings.dart';
 import '../../domain/logic/body_nutrition_analyzer.dart';
 import '../../domain/logic/sleep_planner.dart';
@@ -321,6 +324,21 @@ class _SleepPlannerScreenState extends ConsumerState<SleepPlannerScreen> {
                               () => _profile = _profile.copyWith(dietType: d),
                             ),
                           ),
+                          _EnumChips<DailyFocusMode>(
+                            title: 'Ưu tiên thực đơn hôm nay',
+                            values: DailyFocusMode.values,
+                            selected: _profile.dailyFocusMode,
+                            labelBuilder: (f) => switch (f) {
+                              DailyFocusMode.brainFocus => 'Tỉnh táo trí não',
+                              DailyFocusMode.staminaPhysical => 'Bền sức',
+                              DailyFocusMode.leanAntiBloat => 'Nhẹ bụng / Giữ dáng',
+                              DailyFocusMode.digestiveComfort => 'Êm bụng / Dễ tiêu',
+                              DailyFocusMode.quickBudget => 'Nhanh gọn / Tiết kiệm',
+                            },
+                            onSelected: (f) => setState(
+                              () => _profile = _profile.copyWith(dailyFocusMode: f),
+                            ),
+                          ),
                           _EnumChips<WorkShift>(
                             title: 'Ca làm việc',
                             values: WorkShift.values,
@@ -385,48 +403,11 @@ class _SleepPlannerScreenState extends ConsumerState<SleepPlannerScreen> {
                     style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 10),
-                  Card(
-                    color: theme.colorScheme.secondaryContainer
-                        .withValues(alpha: 0.45),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _MetricRow(
-                            label: 'Chỉ số BMI (Chuẩn Châu Á)',
-                            value: '${plan.bmi} · ${plan.bmiCategory}',
-                          ),
-                          _MetricRow(
-                            label: 'BMR / TDEE',
-                            value: '${plan.bmr} / ${plan.tdee} kcal',
-                          ),
-                          _MetricRow(
-                            label: 'Calo mục tiêu mỗi ngày',
-                            value: '${plan.targetCalories} kcal/ngày',
-                          ),
-                          _MetricRow(
-                            label: 'Đạm khuyến nghị',
-                            value:
-                                '${plan.dailyProteinGramsMin}–${plan.dailyProteinGramsMax} g/ngày',
-                          ),
-                          _MetricRow(
-                            label: 'Nước cần uống & chu kỳ',
-                            value:
-                                '${plan.dailyWaterMl} ml/ngày (mỗi ${plan.waterIntervalMin}p, '
-                                '${TimeUtils.format24h(plan.waterStartHour, plan.waterStartMinute)}–'
-                                '${TimeUtils.format24h(plan.waterEndHour, plan.waterEndMinute)})',
-                          ),
-                          const Divider(height: 20),
-                          Text(
-                            'Tỷ lệ đĩa ăn: ${plan.plateRatioText}',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  _NutritionBentoGrid(
+                    plan: plan,
+                    waterMl: ref.watch(waterIntakeMlProvider),
+                    onAddWater: () =>
+                        ref.read(waterIntakeMlProvider.notifier).addWater(200),
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -660,6 +641,214 @@ class _DisclaimerCard extends StatelessWidget {
         HealthDisclaimer.text,
         style: theme.textTheme.bodySmall,
       ),
+    );
+  }
+}
+
+class _NutritionBentoGrid extends StatelessWidget {
+  const _NutritionBentoGrid({
+    required this.plan,
+    required this.waterMl,
+    required this.onAddWater,
+  });
+
+  final NutritionPlan plan;
+  final int waterMl;
+  final VoidCallback onAddWater;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final largeText = MediaQuery.textScalerOf(context).scale(1) > 1.35;
+    final waterProgress =
+        plan.dailyWaterMl > 0 ? (waterMl / plan.dailyWaterMl).clamp(0.0, 1.0) : 0.0;
+
+    final calorieCard = Card(
+      color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.45),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 72,
+              height: 72,
+              child: PieChart(
+                PieChartData(
+                  startDegreeOffset: -90,
+                  sectionsSpace: 2,
+                  centerSpaceRadius: 22,
+                  sections: [
+                    PieChartSectionData(
+                      value: plan.bmr.toDouble(),
+                      color: theme.colorScheme.primary,
+                      radius: 10,
+                      showTitle: false,
+                    ),
+                    PieChartSectionData(
+                      value: (plan.targetCalories - plan.bmr)
+                          .abs()
+                          .clamp(100, 1500)
+                          .toDouble(),
+                      color: theme.colorScheme.tertiary,
+                      radius: 10,
+                      showTitle: false,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Calo mục tiêu: ${plan.targetCalories} kcal/ngày',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'BMR: ${plan.bmr} · TDEE: ${plan.tdee} kcal',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final bmiCard = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(LucideIcons.scale, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text('BMI Châu Á', style: theme.textTheme.labelMedium),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${plan.bmi} · ${plan.bmiCategory}',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final proteinCard = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(LucideIcons.beef, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text('Đạm khuyến nghị', style: theme.textTheme.labelMedium),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${plan.dailyProteinGramsMin}–${plan.dailyProteinGramsMax} g/ngày',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final waterCard = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: 10,
+              runSpacing: 8,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(LucideIcons.droplets, size: 18, color: theme.colorScheme.primary),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Nước: $waterMl / ${plan.dailyWaterMl} ml (mỗi ${plan.waterIntervalMin}p)',
+                      style: theme.textTheme.labelLarge,
+                    ),
+                  ],
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: onAddWater,
+                  style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
+                  icon: const Icon(LucideIcons.plus, size: 16),
+                  label: const Text('+200ml'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(value: waterProgress, minHeight: 8),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final plateCard = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Text(
+          'Tỷ lệ đĩa ăn: ${plan.plateRatioText}',
+          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        calorieCard,
+        const SizedBox(height: 10),
+        if (largeText) ...[
+          bmiCard,
+          const SizedBox(height: 10),
+          proteinCard,
+        ] else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: bmiCard),
+              const SizedBox(width: 10),
+              Expanded(child: proteinCard),
+            ],
+          ),
+        const SizedBox(height: 10),
+        waterCard,
+        const SizedBox(height: 10),
+        plateCard,
+      ],
     );
   }
 }

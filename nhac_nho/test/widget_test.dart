@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nhac_nho/application/providers.dart';
 import 'package:nhac_nho/domain/entities/body_profile.dart';
 import 'package:nhac_nho/domain/entities/user_settings.dart';
@@ -41,9 +42,13 @@ void main() {
         .thenAnswer((_) async => false);
     when(() => scheduler.rescheduleAll(any())).thenAnswer((_) async {});
 
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
           reminderRepositoryProvider.overrideWithValue(reminderRepo),
           settingsRepositoryProvider.overrideWithValue(settingsRepo),
           notificationSchedulerProvider.overrideWithValue(scheduler),

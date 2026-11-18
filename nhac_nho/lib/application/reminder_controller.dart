@@ -7,7 +7,9 @@ import '../domain/entities/completion_log.dart';
 import '../domain/entities/preset_profile.dart';
 import '../domain/entities/reminder.dart';
 import '../domain/entities/user_settings.dart';
+import '../domain/logic/adaptive_food_catalog.dart';
 import '../domain/logic/habit_stats_calculator.dart';
+import '../domain/logic/universal_day_scheduler.dart';
 import '../domain/logic/work_meal_guide.dart';
 import 'providers.dart';
 
@@ -179,18 +181,39 @@ class ReminderController extends AsyncNotifier<ReminderState> {
   }
 
   Future<void> markStatus(int reminderId, CompletionStatus status) async {
+    await markStatusForDate(reminderId, status, _now());
+  }
+
+  Future<void> markStatusForDate(
+    int reminderId,
+    CompletionStatus status,
+    DateTime date,
+  ) async {
     final reminderRepo = ref.read(reminderRepositoryProvider);
     final now = _now();
+    final dateKey = HabitStatsCalculator.formatDateKey(date);
     final todayKey = HabitStatsCalculator.formatDateKey(now);
-    final currentStatus = state.value?.todayLogs[reminderId];
+
+    CompletionStatus? currentStatus;
+    if (dateKey == todayKey) {
+      currentStatus = state.value?.todayLogs[reminderId];
+    } else {
+      final logs = await reminderRepo.getCompletionLogsByDate(dateKey);
+      for (final log in logs) {
+        if (log.reminderId == reminderId) {
+          currentStatus = log.status;
+          break;
+        }
+      }
+    }
 
     if (currentStatus == status) {
-      await reminderRepo.deleteCompletionLogForDate(reminderId, todayKey);
+      await reminderRepo.deleteCompletionLogForDate(reminderId, dateKey);
     } else {
       await reminderRepo.upsertCompletionLog(
         CompletionLog(
           reminderId: reminderId,
-          date: todayKey,
+          date: dateKey,
           status: status,
           completedAt: now.toIso8601String(),
         ),
@@ -237,6 +260,57 @@ class ReminderController extends AsyncNotifier<ReminderState> {
     ref.invalidate(userSettingsProvider);
     ref.invalidate(bodyProfileProvider);
     await _refreshAndReschedule();
+  }
+
+  Future<void> applyUniversalDayPlan({
+    required ScheduledDayPlan plan,
+    required UserSettings settings,
+    required BodyProfile profile,
+    bool replaceExistingTasks = false,
+  }) async {
+    await _requestPermissionSafely();
+    final reminderRepo = ref.read(reminderRepositoryProvider);
+    final settingsRepo = ref.read(settingsRepositoryProvider);
+
+    await settingsRepo.saveUserSettings(settings);
+    await settingsRepo.saveBodyProfile(profile);
+    await settingsRepo.setOnboardingCompleted(true);
+
+    final routineReminders = plan.reminders.where((r) => r.isRoutine).toList();
+    final taskReminders = plan.reminders.where((r) => !r.isRoutine).toList();
+
+    await reminderRepo.replaceRoutineReminders(routineReminders);
+    if (replaceExistingTasks) {
+      final existing = await reminderRepo.getAllReminders();
+      for (final r in existing) {
+        if (!r.isRoutine && r.id != null) {
+          await reminderRepo.deleteReminder(r.id!);
+        }
+      }
+    }
+    for (final taskReminder in taskReminders) {
+      await reminderRepo.insertReminder(taskReminder);
+    }
+
+    ref.invalidate(userSettingsProvider);
+    ref.invalidate(bodyProfileProvider);
+    await _refreshAndReschedule();
+  }
+
+  Future<void> swapMealReminderVariant({
+    required Reminder reminder,
+    required BodyProfile profile,
+    required int nextVariantIndex,
+  }) async {
+    final slot = AdaptiveFoodCatalog.inferSlotFromTitle(reminder.title);
+    final suggestion = AdaptiveFoodCatalog.swapMealOption(
+      slot: slot,
+      profile: profile,
+      focusMode: profile.dailyFocusMode,
+      variantIndex: nextVariantIndex,
+    );
+    final newNote = AdaptiveFoodCatalog.formatNote(suggestion);
+    await updateReminder(reminder.copyWith(note: newNote));
   }
 
   Future<void> rescheduleAll() async {
