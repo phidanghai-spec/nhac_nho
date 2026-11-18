@@ -122,10 +122,17 @@ class _SleepPlannerScreenState extends ConsumerState<SleepPlannerScreen> {
             profile: updatedProfile,
           );
       if (mounted) {
+        final totalEnabled = ref
+                .read(reminderControllerProvider)
+                .value
+                ?.allReminders
+                .where((r) => r.enabled)
+                .length ??
+            0;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Đã cập nhật lịch ăn uống, uống nước và giấc ngủ vào danh sách nhắc!',
+              'Đã lên lịch hẹn giờ cho $totalEnabled lời nhắc nhở!',
             ),
           ),
         );

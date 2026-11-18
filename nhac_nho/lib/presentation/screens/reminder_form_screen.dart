@@ -182,6 +182,18 @@ class _ReminderFormScreenState extends ConsumerState<ReminderFormScreen> {
       await controller.addReminder(reminder);
     }
     if (mounted) {
+      final count = ref
+              .read(reminderControllerProvider)
+              .value
+              ?.allReminders
+              .where((r) => r.enabled)
+              .length ??
+          0;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã lên lịch hẹn giờ cho $count lời nhắc nhở!'),
+        ),
+      );
       context.pop();
     }
   }

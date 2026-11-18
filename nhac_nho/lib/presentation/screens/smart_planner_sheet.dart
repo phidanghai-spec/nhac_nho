@@ -549,10 +549,17 @@ class _SmartPlannerSheetState extends ConsumerState<SmartPlannerSheet> {
           );
       if (mounted) {
         Navigator.of(context).pop();
+        final totalEnabled = ref
+                .read(reminderControllerProvider)
+                .value
+                ?.allReminders
+                .where((r) => r.enabled)
+                .length ??
+            plan.reminders.length;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Đã lập lịch ${plan.reminders.length} mốc nhắc thông minh!',
+              'Đã lên lịch hẹn giờ cho $totalEnabled lời nhắc nhở!',
             ),
           ),
         );

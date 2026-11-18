@@ -1,4 +1,4 @@
-﻿// Màn hình Hôm nay: Chọn 7 ngày, Bento Tiến độ + Nước, Dòng thời gian 4 buổi & Trợ lý Lập lịch.
+// Màn hình Hôm nay: Chọn 7 ngày, Bento Tiến độ + Nước, Dòng thời gian 4 buổi & Trợ lý Lập lịch.
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -9,6 +9,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../application/providers.dart';
 import '../../application/reminder_controller.dart';
+import '../../core/time_utils.dart';
 import '../../domain/entities/body_profile.dart';
 import '../../domain/entities/completion_log.dart';
 import '../../domain/entities/preset_profile.dart';
@@ -98,7 +99,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             );
           }
 
-          final now = DateTime.now();
+          final now = ref.watch(currentTimeProvider)();
           final todayOnly = DateTime(now.year, now.month, now.day);
           final isToday = selectedDate == todayOnly;
 
@@ -166,6 +167,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   selectedDate: selectedDate,
                   onSelect: (d) =>
                       ref.read(selectedHomeDateProvider.notifier).selectDate(d),
+                ),
+                const SizedBox(height: 12),
+                _NotificationStatusBanner(
+                  now: now,
+                  todayReminders: state.todayReminders,
+                  pendingCount:
+                      ref.watch(pendingNotificationsCountProvider).value ??
+                          state.todayTotalEnabled,
+                  onTapDetails: () =>
+                      _showScheduledQueueSheet(context, state.todayReminders),
+                  onTestNotification: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    await ref
+                        .read(notificationSchedulerProvider)
+                        .showInstantTestNotification();
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Đã gửi thông báo nhắc nhở mẫu!'),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 14),
                 _BentoSummaryCard(
@@ -308,7 +330,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             }
           },
-          onToggleEnabled: () => controller.toggleEnabled(reminder),
+          onToggleEnabled: () async {
+            final messenger = ScaffoldMessenger.of(context);
+            await controller.toggleEnabled(reminder);
+            final count = ref
+                    .read(reminderControllerProvider)
+                    .value
+                    ?.allReminders
+                    .where((r) => r.enabled)
+                    .length ??
+                0;
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text('Đã lên lịch hẹn giờ cho $count lời nhắc nhở!'),
+              ),
+            );
+          },
           onEdit: () => context.push('/reminder/edit', extra: reminder),
           onSwapMeal: reminder.category == ReminderCategory.meal
               ? () {
@@ -367,6 +404,159 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }),
       const SizedBox(height: 8),
     ];
+  }
+
+  void _showScheduledQueueSheet(
+    BuildContext context,
+    List<Reminder> todayReminders,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (ctx) {
+        final enabledItems = todayReminders.where((r) => r.enabled).toList();
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          shrinkWrap: true,
+          children: [
+            Text(
+              'Hàng đợi thông báo hôm nay (${enabledItems.length})',
+              style: Theme.of(ctx).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Các mốc giờ bên dưới đang được hẹn chuông trong hệ thống.',
+              style: Theme.of(ctx).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            if (enabledItems.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text('Chưa có lịch nhắc nào đang bật hôm nay.'),
+              )
+            else
+              for (final r in enabledItems)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    LucideIcons.bellRing,
+                    color: Theme.of(ctx).colorScheme.primary,
+                  ),
+                  title: Text(r.title),
+                  subtitle: Text(
+                    r.repeat == RepeatType.interval
+                        ? 'Chu kỳ ${r.intervalMinutes ?? 90}p (${TimeUtils.format24h(r.hour, r.minute)}–${TimeUtils.format24h(r.endHour ?? r.hour, r.endMinute ?? r.minute)})'
+                        : 'Hẹn lúc ${TimeUtils.format24h(r.hour, r.minute)}',
+                  ),
+                ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _NotificationStatusBanner extends StatelessWidget {
+  const _NotificationStatusBanner({
+    required this.now,
+    required this.todayReminders,
+    required this.pendingCount,
+    required this.onTapDetails,
+    required this.onTestNotification,
+  });
+
+  final DateTime now;
+  final List<Reminder> todayReminders;
+  final int pendingCount;
+  final VoidCallback onTapDetails;
+  final VoidCallback onTestNotification;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final nowMinutes = now.hour * 60 + now.minute;
+
+    Reminder? nextReminder;
+    int? diffMinutes;
+    for (final r in todayReminders) {
+      if (!r.enabled) continue;
+      final rMinutes = r.hour * 60 + r.minute;
+      if (rMinutes >= nowMinutes) {
+        nextReminder = r;
+        diffMinutes = rMinutes - nowMinutes;
+        break;
+      }
+    }
+
+    String nextLabel;
+    if (nextReminder != null && diffMinutes != null) {
+      final countdown = diffMinutes >= 60
+          ? 'còn ${diffMinutes ~/ 60} giờ ${diffMinutes % 60} phút'
+          : (diffMinutes == 0 ? 'sắp reo ngay' : 'còn $diffMinutes phút');
+      nextLabel =
+          'Sắp nhắc: ${TimeUtils.format24h(nextReminder.hour, nextReminder.minute)} – ${nextReminder.title} ($countdown)';
+    } else {
+      nextLabel = 'Đã qua các mốc chính hôm nay · Hẹn tiếp vào ngày mai';
+    }
+
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.55),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTapDetails,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 10,
+                runSpacing: 8,
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.bellRing,
+                        size: 20,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Trạng thái Nhắc nhở · $pendingCount chuông đã đặt',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  FilledButton.tonalIcon(
+                    onPressed: onTestNotification,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(48, 48),
+                    ),
+                    icon: const Icon(LucideIcons.volume2, size: 16),
+                    label: const Text('Thử chuông báo'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                nextLabel,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

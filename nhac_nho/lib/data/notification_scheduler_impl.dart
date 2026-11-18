@@ -298,6 +298,37 @@ class NotificationSchedulerImpl implements NotificationScheduler {
     );
   }
 
+  @override
+  Future<int> getPendingNotificationsCount() async {
+    await init();
+    try {
+      final pending = await _plugin.pendingNotificationRequests();
+      return pending.length;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  @override
+  Future<void> showInstantTestNotification({
+    String? title,
+    String? body,
+    ReminderCategory? category,
+  }) async {
+    await init();
+    final cat = category ?? ReminderCategory.meal;
+    final resolvedTitle = title ?? 'Thử chuông báo Nhắc Nhở';
+    final resolvedBody = body ??
+        'Thông báo hoạt động bình thường! Bạn có thể bấm "Hoãn 10 phút" ngay bên dưới.';
+    await _plugin.show(
+      id: 999999,
+      title: resolvedTitle,
+      body: resolvedBody,
+      notificationDetails: _detailsForCategory(cat.name),
+      payload: 'reminder:9999:${cat.name}:$resolvedTitle',
+    );
+  }
+
   Future<void> _zonedScheduleWithFallback({
     required int id,
     required String title,

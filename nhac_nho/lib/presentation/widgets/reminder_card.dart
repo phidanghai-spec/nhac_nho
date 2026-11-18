@@ -168,6 +168,44 @@ class ReminderCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: reminder.enabled
+                                    ? theme.colorScheme.secondaryContainer
+                                    : theme.colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    reminder.enabled
+                                        ? LucideIcons.bellRing
+                                        : LucideIcons.bellOff,
+                                    size: 13,
+                                    color: reminder.enabled
+                                        ? theme.colorScheme.onSecondaryContainer
+                                        : theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    reminder.enabled
+                                        ? 'Đã hẹn chuông ${TimeUtils.format24h(reminder.hour, reminder.minute)}'
+                                        : 'Đã tắt chuông',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: reminder.enabled
+                                          ? theme.colorScheme.onSecondaryContainer
+                                          : theme.colorScheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),

@@ -1,4 +1,4 @@
-﻿// Định nghĩa các Riverpod providers kết nối các tầng.
+// Định nghĩa các Riverpod providers kết nối các tầng.
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -148,3 +148,14 @@ final dateCompletionLogsProvider =
   final logs = await repo.getCompletionLogsByDate(dateKey);
   return {for (final log in logs) log.reminderId: log.status};
 });
+
+final pendingNotificationsCountProvider = FutureProvider<int>((ref) async {
+  ref.watch(reminderControllerProvider);
+  try {
+    return await ref.read(notificationSchedulerProvider).getPendingNotificationsCount();
+  } catch (_) {
+    return 0;
+  }
+});
+
+final currentTimeProvider = Provider<DateTime Function()>((ref) => DateTime.now);

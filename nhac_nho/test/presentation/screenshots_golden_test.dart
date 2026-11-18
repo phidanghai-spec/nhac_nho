@@ -104,6 +104,8 @@ void main() {
         .thenAnswer((_) async => true);
     when(() => scheduler.canScheduleExactAlarms())
         .thenAnswer((_) async => true);
+    when(() => scheduler.getPendingNotificationsCount())
+        .thenAnswer((_) async => reminders.length);
 
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
@@ -111,6 +113,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          currentTimeProvider.overrideWithValue(
+            () => DateTime(2026, 11, 18, 11, 25),
+          ),
           sharedPreferencesProvider.overrideWithValue(prefs),
           reminderRepositoryProvider.overrideWithValue(reminderRepo),
           settingsRepositoryProvider.overrideWithValue(settingsRepo),

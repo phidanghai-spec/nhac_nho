@@ -16,4 +16,10 @@ abstract class NotificationScheduler {
     required String categoryId,
     Duration delay = const Duration(minutes: 10),
   });
+  Future<int> getPendingNotificationsCount();
+  Future<void> showInstantTestNotification({
+    String? title,
+    String? body,
+    ReminderCategory? category,
+  });
 }

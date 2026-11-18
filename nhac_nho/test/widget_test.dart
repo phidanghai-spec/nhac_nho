@@ -41,6 +41,8 @@ void main() {
     when(() => settingsRepo.hasCompletedOnboarding())
         .thenAnswer((_) async => false);
     when(() => scheduler.rescheduleAll(any())).thenAnswer((_) async {});
+    when(() => scheduler.getPendingNotificationsCount())
+        .thenAnswer((_) async => 0);
 
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();

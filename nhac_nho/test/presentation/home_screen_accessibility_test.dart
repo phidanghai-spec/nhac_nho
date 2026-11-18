@@ -91,6 +91,13 @@ void main() {
         .thenAnswer((_) async => const BodyProfile());
     when(() => settingsRepo.hasCompletedOnboarding())
         .thenAnswer((_) async => true);
+    when(() => scheduler.getPendingNotificationsCount())
+        .thenAnswer((_) async => 3);
+    when(() => scheduler.showInstantTestNotification(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          category: any(named: 'category'),
+        )).thenAnswer((_) async {});
 
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
@@ -127,6 +134,10 @@ void main() {
 
   testWidgets('HomeScreen không overflow với textScaler = 2.0 ở theme sáng', (tester) async {
     await pumpScaledHome(tester, brightness: Brightness.light);
+    expect(find.textContaining('Trạng thái Nhắc nhở'), findsOneWidget);
+    await tester.tap(find.text('Thử chuông báo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Đã gửi thông báo nhắc nhở mẫu!'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.textContaining('Deep Work'),
       250,
@@ -166,6 +177,13 @@ void main() {
         .thenAnswer((_) async => const BodyProfile());
     when(() => settingsRepo.hasCompletedOnboarding())
         .thenAnswer((_) async => true);
+    when(() => scheduler.getPendingNotificationsCount())
+        .thenAnswer((_) async => 3);
+    when(() => scheduler.showInstantTestNotification(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          category: any(named: 'category'),
+        )).thenAnswer((_) async {});
 
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();

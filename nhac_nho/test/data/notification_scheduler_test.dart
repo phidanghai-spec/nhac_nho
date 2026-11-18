@@ -68,6 +68,17 @@ void main() {
         .thenAnswer((_) async {});
     when(() => mockPlugin.cancelAllPendingNotifications())
         .thenAnswer((_) async {});
+    when(() => mockPlugin.pendingNotificationRequests())
+        .thenAnswer((_) async => []);
+    when(
+      () => mockPlugin.show(
+        id: any(named: 'id'),
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        notificationDetails: any(named: 'notificationDetails'),
+        payload: any(named: 'payload'),
+      ),
+    ).thenAnswer((_) async {});
     when(
       () => mockPlugin.zonedSchedule(
         id: any(named: 'id'),
@@ -331,5 +342,34 @@ void main() {
         payload: any(named: 'payload'),
       ),
     );
+  });
+
+  test('getPendingNotificationsCount trả về đúng số lượng thông báo đang chờ', () async {
+    when(() => mockPlugin.pendingNotificationRequests()).thenAnswer(
+      (_) async => const [
+        PendingNotificationRequest(100, 'A', 'B', null),
+        PendingNotificationRequest(200, 'C', 'D', null),
+      ],
+    );
+    final count = await scheduler.getPendingNotificationsCount();
+    expect(count, 2);
+  });
+
+  test('showInstantTestNotification gọi plugin.show với kênh và payload hợp lệ', () async {
+    await scheduler.showInstantTestNotification(
+      title: 'Kiểm tra chuông',
+      body: 'Nội dung thử',
+      category: ReminderCategory.hydration,
+    );
+
+    verify(
+      () => mockPlugin.show(
+        id: 999999,
+        title: 'Kiểm tra chuông',
+        body: 'Nội dung thử',
+        notificationDetails: any(named: 'notificationDetails'),
+        payload: 'reminder:9999:hydration:Kiểm tra chuông',
+      ),
+    ).called(1);
   });
 }
