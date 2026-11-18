@@ -344,9 +344,76 @@ class _SmartPlannerSheetState extends ConsumerState<SmartPlannerSheet> {
   }
 
   Widget _buildStep2(BuildContext context) {
+    final rolloverTasks =
+        ref.watch(yesterdayIncompleteTasksProvider).value ?? const <Reminder>[];
+    final addedTitles = _tasks.map((t) => t.title.toLowerCase()).toSet();
+    final pendingRollover = rolloverTasks
+        .where((r) => !addedTitles.contains(r.title.toLowerCase()))
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (pendingRollover.isNotEmpty) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .tertiaryContainer
+                  .withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      LucideIcons.rotateCw,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onTertiaryContainer,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Việc chưa xong hôm qua (${pendingRollover.length})',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Chạm 1 lần để dời sang lịch thông minh hôm nay:',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: pendingRollover.map((r) {
+                    return ActionChip(
+                      avatar: const Icon(LucideIcons.plus, size: 16),
+                      label: Text(r.title),
+                      onPressed: () => _addDraftTask(
+                        overrideTitle: r.title,
+                        overrideMins: 60,
+                        overrideDemand: r.priority == 1
+                            ? TaskEnergyDemand.highFocus
+                            : TaskEnergyDemand.mediumTask,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        ],
         Text(
           '2. Ghi các việc cần làm trong ngày',
           style: Theme.of(context).textTheme.titleMedium,

@@ -79,5 +79,19 @@ void main() {
       );
       expect(slots.length, 20);
     });
+
+    test('bỏ qua khung giờ nghỉ trưa 12:30–13:20 khi sinh mốc chu kỳ', () {
+      final slots = TimeUtils.generateIntervalSlots(
+        startHour: 11,
+        startMinute: 30,
+        endHour: 14,
+        endMinute: 30,
+        intervalMinutes: 30,
+      );
+      expect(
+        slots.map((s) => s.format24h()).toList(),
+        ['11:30', '12:00', '13:30', '14:00', '14:30'],
+      );
+    });
   });
 }

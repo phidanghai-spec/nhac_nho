@@ -21,6 +21,7 @@ import '../../domain/logic/sleep_planner.dart';
 import '../../domain/logic/work_meal_guide.dart';
 import '../theme/category_style.dart';
 import '../widgets/reminder_card.dart';
+import '../widgets/shopping_list_sheet.dart';
 import 'smart_planner_sheet.dart';
 
 enum _HomeFilter { all, tasks, routines }
@@ -219,6 +220,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       selected: _filter == _HomeFilter.routines,
                       onSelected: (_) =>
                           setState(() => _filter = _HomeFilter.routines),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(LucideIcons.shoppingBasket, size: 16),
+                      label: const Text('Đi chợ / Nguyên liệu'),
+                      onPressed: () =>
+                          ShoppingListSheet.show(context, dayReminders),
                     ),
                   ],
                 ),

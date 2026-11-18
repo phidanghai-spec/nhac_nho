@@ -10,6 +10,7 @@ import '../data/reminder_repository_impl.dart';
 import '../data/settings_repository_impl.dart';
 import '../domain/entities/body_profile.dart';
 import '../domain/entities/completion_log.dart';
+import '../domain/entities/reminder.dart';
 import '../domain/entities/user_settings.dart';
 import '../domain/logic/habit_stats_calculator.dart';
 import '../domain/repositories/reminder_repository.dart';
@@ -159,3 +160,28 @@ final pendingNotificationsCountProvider = FutureProvider<int>((ref) async {
 });
 
 final currentTimeProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+final yesterdayIncompleteTasksProvider = FutureProvider<List<Reminder>>((ref) async {
+  ref.watch(reminderControllerProvider);
+  final repo = ref.read(reminderRepositoryProvider);
+  final now = ref.read(currentTimeProvider)();
+  final yesterday = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 1));
+  final yesterdayKey = HabitStatsCalculator.formatDateKey(yesterday);
+
+  final all = await repo.getAllReminders();
+  final logs = await repo.getCompletionLogsByDate(yesterdayKey);
+  final doneIds = <int>{
+    for (final log in logs)
+      if (log.status == CompletionStatus.done) log.reminderId,
+  };
+
+  return all
+      .where(
+        (r) =>
+            !r.isRoutine &&
+            r.category == ReminderCategory.task &&
+            r.isScheduledForDate(yesterday) &&
+            (r.id == null || !doneIds.contains(r.id)),
+      )
+      .toList();
+});

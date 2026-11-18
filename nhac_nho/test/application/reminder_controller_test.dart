@@ -204,4 +204,67 @@ void main() {
     expect(AdaptiveFoodCatalog.parseFoodItemsFromNote(updated.note), isNotEmpty);
     verify(() => scheduler.rescheduleAll(any())).called(1);
   });
+
+  test('yesterdayIncompleteTasksProvider lọc đúng việc chưa xong hôm qua', () async {
+    final now = DateTime(2026, 11, 18, 9, 0);
+    const unfinishedTask = Reminder(
+      id: 101,
+      title: 'Gửi báo cáo tuần',
+      category: ReminderCategory.task,
+      isRoutine: false,
+      hour: 14,
+      minute: 0,
+      repeat: RepeatType.daily,
+      createdAt: '2026-11-17T00:00:00Z',
+    );
+    const doneTask = Reminder(
+      id: 102,
+      title: 'Họp buổi sáng',
+      category: ReminderCategory.task,
+      isRoutine: false,
+      hour: 9,
+      minute: 0,
+      repeat: RepeatType.daily,
+      createdAt: '2026-11-17T00:00:00Z',
+    );
+    const routineItem = Reminder(
+      id: 103,
+      title: 'Uống nước',
+      category: ReminderCategory.hydration,
+      isRoutine: true,
+      hour: 8,
+      minute: 0,
+      repeat: RepeatType.daily,
+      createdAt: '2026-11-17T00:00:00Z',
+    );
+
+    when(() => reminderRepo.getAllReminders())
+        .thenAnswer((_) async => [unfinishedTask, doneTask, routineItem]);
+    when(() => reminderRepo.getCompletionLogsByDate('2026-11-17')).thenAnswer(
+      (_) async => const [
+        CompletionLog(
+          id: 1,
+          reminderId: 102,
+          date: '2026-11-17',
+          status: CompletionStatus.done,
+          completedAt: '2026-11-17T09:30:00Z',
+        ),
+      ],
+    );
+
+    final rolloverContainer = ProviderContainer(
+      overrides: [
+        currentTimeProvider.overrideWithValue(() => now),
+        reminderRepositoryProvider.overrideWithValue(reminderRepo),
+        settingsRepositoryProvider.overrideWithValue(settingsRepo),
+        notificationSchedulerProvider.overrideWithValue(scheduler),
+      ],
+    );
+    addTearDown(rolloverContainer.dispose);
+
+    final result =
+        await rolloverContainer.read(yesterdayIncompleteTasksProvider.future);
+    expect(result.length, 1);
+    expect(result.first.title, 'Gửi báo cáo tuần');
+  });
 }

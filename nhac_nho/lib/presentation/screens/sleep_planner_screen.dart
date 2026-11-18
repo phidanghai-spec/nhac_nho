@@ -13,6 +13,7 @@ import '../../domain/entities/nutrition_plan.dart';
 import '../../domain/entities/user_settings.dart';
 import '../../domain/logic/body_nutrition_analyzer.dart';
 import '../../domain/logic/sleep_planner.dart';
+import '../widgets/shopping_list_sheet.dart';
 
 class SleepPlannerScreen extends ConsumerStatefulWidget {
   const SleepPlannerScreen({super.key});
@@ -503,7 +504,23 @@ class _SleepPlannerScreenState extends ConsumerState<SleepPlannerScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        final reminders = ref
+                                .read(reminderControllerProvider)
+                                .value
+                                ?.todayReminders ??
+                            const [];
+                        ShoppingListSheet.show(context, reminders);
+                      },
+                      icon: const Icon(LucideIcons.shoppingBasket),
+                      label: const Text('Đi chợ / Nguyên liệu hôm nay'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   SizedBox(
                     height: 54,
                     child: FilledButton.icon(

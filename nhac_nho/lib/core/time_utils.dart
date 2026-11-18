@@ -136,9 +136,14 @@ class TimeUtils {
 
     final slots = <TimeSlot>[];
     var current = startTotal;
+    const napStartMin = 12 * 60 + 30; // 12:30
+    const napEndMin = 13 * 60 + 20; // 13:20
     while (current <= endTotal && slots.length < maxSlots) {
       final normalized = current % (24 * 60);
-      slots.add(TimeSlot(normalized ~/ 60, normalized % 60));
+      // Không làm phiền giấc ngủ trưa ngắn (Power Nap 12:30 - 13:20).
+      if (normalized < napStartMin || normalized > napEndMin) {
+        slots.add(TimeSlot(normalized ~/ 60, normalized % 60));
+      }
       current += intervalMinutes;
     }
     return slots;
