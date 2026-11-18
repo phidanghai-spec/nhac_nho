@@ -407,6 +407,20 @@ Giao diện: Tiếng Việt, giờ 24h, Material 3, hỗ trợ chế độ tối
 - **Phase 4B:** `feat: theme and accessibility` — `app_theme.dart` (FlexColorScheme + Be Vietnam Pro + Dynamic Color + High Contrast), `category_style.dart`, Semantics, `flutter_animate`, widget test `textScaler = 2.0` + dark mode.
 - **Phase 5:** `feat: settings, presets and permissions` — `settings_screen.dart` hoàn chỉnh với 4 Presets, giờ mặc định, trạng thái quyền, xin quyền đúng thời điểm.
 - **Phase 6:** `chore: polish` — Rà soát nghiệm thu, `README.md`, tuyên bố sức khỏe, nút Hoãn 10 phút (slot 99), `flutter analyze`, `flutter test`, `flutter build apk --debug`.
+- **Phase 7:** `feat: universal smart scheduler, adaptive food matrix and visual timeline ui overhaul` — Mở rộng hệ thống lập lịch động theo giờ thức thực tế (`UniversalDayScheduler`, `UserTaskInput`), ma trận thực phẩm 4 chiều (`AdaptiveFoodCatalog`, `DailyFocusMode`), 7 bộ mẫu khởi tạo nhanh, trợ lý 3 bước (`SmartPlannerSheet`), giao diện Visual Timeline 4 buổi & Bento Grid (`fl_chart`, `lucide_icons_flutter`, `flutter_slidable`, theo dõi nước `+200ml`), đạt **67/67 tests** (bao gồm `textScaler = 2.0` ở Light/Dark/HighContrast).
+
+---
+
+## 16. Kiến trúc Phase 7: Universal Smart Planner & Bento UI
+- **Lập lịch Động theo Nhịp sống Cá nhân (`UniversalDayScheduler` & `UserTaskInput`):**
+  - Không áp đặt giờ hành chính cố định; tự neo lịch theo `wakeTime` và `sleepHours` thực tế từ `UserSettings` (hỗ trợ cả ca đêm / xoay ca).
+  - Phân bổ công việc theo `TaskEnergyDemand` (`highFocus` vào đỉnh năng lượng sinh học, `mediumTask`, `lightChore`, `physicalOrEvent`), tự dịch bữa ăn nếu trùng lịch cố định và chèn nhắc nghỉ/uống nước cho việc kéo dài >= 60 phút.
+- **Ma trận Thực phẩm 4 Chiều (`AdaptiveFoodCatalog`) & 7 Bộ mẫu khởi tạo nhanh (`PresetId`):**
+  - Lọc thực đơn Việt theo 4 chiều: Thể trạng/Bệnh lý (`BodyProfile`), Chế độ ăn (`omnivore`, `vegetarian`, `vegan`), Nhu cầu ưu tiên trong ngày (`DailyFocusMode`: `brainFocus`, `staminaPhysical`, `leanAntiBloat`, `digestiveComfort`, `quickBudget`), và xoay vòng biến thể qua `swapMealOption(...)` / **Đổi món** trực tiếp trên thẻ.
+  - Bổ sung từ 4 lên 7 bộ mẫu khởi tạo nhanh: `officeCoder`, `student`, `freelancer`, `modelAesthetic`, `homemakerParent`, `activeWorker`, `seniorHealth`.
+- **Trợ lý 3 bước & Giao diện Visual Timeline / Bento Grid:**
+  - `SmartPlannerSheet`: 3 bước (1. Chọn `DailyFocusMode` & mẫu nhanh -> 2. Nhập việc tự do / Smart Chips, thời lượng, mức năng lượng, giờ cố định/tự động -> 3. Xem trước dòng thời gian, đổi món & áp dụng giữ nguyên streak qua `replaceRoutineReminders`).
+  - `HomeScreen`, `SleepPlannerScreen`, `StatsScreen`: Nâng cấp Visual Timeline 4 buổi (`Sáng`, `Trưa`, `Chiều`, `Tối`), thanh chọn 7 ngày, Bento Grid với `fl_chart` (Donut, PieChart, BarChart), theo dõi nước uống `+200ml` (`waterIntakeMlProvider`), thao tác vuốt `flutter_slidable`, biểu tượng `lucide_icons_flutter` và thẻ bo góc `20dp`.
 
 ---
 
@@ -734,6 +748,20 @@ Giao diện: Tiếng Việt, giờ 24h, Material 3, hỗ trợ chế độ tối
 - **Phase 4B:** `feat: theme and accessibility` — `app_theme.dart` (FlexColorScheme + Be Vietnam Pro + Dynamic Color + High Contrast), `category_style.dart`, Semantics, `flutter_animate`, widget test `textScaler = 2.0` + dark mode.
 - **Phase 5:** `feat: settings, presets and permissions` — `settings_screen.dart` hoàn chỉnh với 4 Presets, giờ mặc định, trạng thái quyền, xin quyền đúng thời điểm.
 - **Phase 6:** `chore: polish` — Rà soát nghiệm thu, `README.md`, tuyên bố sức khỏe, nút Hoãn 10 phút (slot 99), `flutter analyze`, `flutter test`, `flutter build apk --debug`.
+- **Phase 7:** `feat: universal smart scheduler, adaptive food matrix and visual timeline ui overhaul` — Mở rộng hệ thống lập lịch động theo giờ thức thực tế (`UniversalDayScheduler`, `UserTaskInput`), ma trận thực phẩm 4 chiều (`AdaptiveFoodCatalog`, `DailyFocusMode`), 7 bộ mẫu khởi tạo nhanh, trợ lý 3 bước (`SmartPlannerSheet`), giao diện Visual Timeline 4 buổi & Bento Grid (`fl_chart`, `lucide_icons_flutter`, `flutter_slidable`, theo dõi nước `+200ml`), đạt **67/67 tests** (bao gồm `textScaler = 2.0` ở Light/Dark/HighContrast).
+
+---
+
+## 16. Kiến trúc Phase 7: Universal Smart Planner & Bento UI
+- **Lập lịch Động theo Nhịp sống Cá nhân (`UniversalDayScheduler` & `UserTaskInput`):**
+  - Không áp đặt giờ hành chính cố định; tự neo lịch theo `wakeTime` và `sleepHours` thực tế từ `UserSettings` (hỗ trợ cả ca đêm / xoay ca).
+  - Phân bổ công việc theo `TaskEnergyDemand` (`highFocus` vào đỉnh năng lượng sinh học, `mediumTask`, `lightChore`, `physicalOrEvent`), tự dịch bữa ăn nếu trùng lịch cố định và chèn nhắc nghỉ/uống nước cho việc kéo dài >= 60 phút.
+- **Ma trận Thực phẩm 4 Chiều (`AdaptiveFoodCatalog`) & 7 Bộ mẫu khởi tạo nhanh (`PresetId`):**
+  - Lọc thực đơn Việt theo 4 chiều: Thể trạng/Bệnh lý (`BodyProfile`), Chế độ ăn (`omnivore`, `vegetarian`, `vegan`), Nhu cầu ưu tiên trong ngày (`DailyFocusMode`: `brainFocus`, `staminaPhysical`, `leanAntiBloat`, `digestiveComfort`, `quickBudget`), và xoay vòng biến thể qua `swapMealOption(...)` / **Đổi món** trực tiếp trên thẻ.
+  - Bổ sung từ 4 lên 7 bộ mẫu khởi tạo nhanh: `officeCoder`, `student`, `freelancer`, `modelAesthetic`, `homemakerParent`, `activeWorker`, `seniorHealth`.
+- **Trợ lý 3 bước & Giao diện Visual Timeline / Bento Grid:**
+  - `SmartPlannerSheet`: 3 bước (1. Chọn `DailyFocusMode` & mẫu nhanh -> 2. Nhập việc tự do / Smart Chips, thời lượng, mức năng lượng, giờ cố định/tự động -> 3. Xem trước dòng thời gian, đổi món & áp dụng giữ nguyên streak qua `replaceRoutineReminders`).
+  - `HomeScreen`, `SleepPlannerScreen`, `StatsScreen`: Nâng cấp Visual Timeline 4 buổi (`Sáng`, `Trưa`, `Chiều`, `Tối`), thanh chọn 7 ngày, Bento Grid với `fl_chart` (Donut, PieChart, BarChart), theo dõi nước uống `+200ml` (`waterIntakeMlProvider`), thao tác vuốt `flutter_slidable`, biểu tượng `lucide_icons_flutter` và thẻ bo góc `20dp`.
 
 ---
 

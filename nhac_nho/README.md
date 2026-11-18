@@ -5,7 +5,13 @@
 ## Tính năng chính
 - **4 loại nhắc & phân biệt đa giác quan (WCAG AA):** Công việc (`task`), Ăn uống (`meal`), Uống nước & Nghỉ (`hydration`), Giấc ngủ (`sleep`) — mỗi loại có màu tương phản >= 4.5:1, icon riêng và nhãn tiếng Việt.
 - **4 kiểu lặp thông báo cục bộ:** Một lần (`once`), Hằng ngày (`daily`), Theo thứ (`weekly`), và Theo chu kỳ phút (`interval` — ví dụ uống nước mỗi 90 phút, hỗ trợ cả khung giờ qua nửa đêm cho ca đêm). Hỗ trợ nút **Hoãn 10 phút** trên Android (slot 99).
-- **4 Bộ lịch mẫu (Presets):** Dân văn phòng / Coder, Học sinh / Sinh viên, Người làm tự do (Freelancer), Người lớn tuổi / Chăm sóc sức khỏe.
+- **7 Bộ lịch mẫu khởi tạo nhanh (Presets):** Dân văn phòng / Coder, Học sinh / Sinh viên, Người làm tự do (Freelancer), Người mẫu / Giữ dáng, Nội trợ / Chăm con, Lao động / Tài xế, Người lớn tuổi / Chăm sóc sức khỏe.
+- **Lập lịch Động theo Giờ thức (`UniversalDayScheduler` & `SmartPlannerSheet` 3 bước):**
+  - Nhập tự do đầu việc (`UserTaskInput`) hoặc chọn Smart Chips, gắn mức năng lượng (`highFocus`, `mediumTask`, `lightChore`, `physicalOrEvent`) và giờ cố định/tự động; app tự neo lịch theo `wakeTime` / `sleepHours`, tự dịch bữa ăn tránh trùng lịch và chèn nghỉ giải lao cho việc >= 60 phút.
+- **Ma trận Thực phẩm 4 Chiều (`AdaptiveFoodCatalog`):**
+  - Cá nhân hóa món Việt theo thể trạng/bệnh lý, chế độ ăn (`omnivore`, `vegetarian`, `vegan`) và ưu tiên trong ngày (`DailyFocusMode`), hiển thị **Food Chips** kèm nút **Đổi món** trực tiếp trên thẻ nhắc.
+- **Giao diện Visual Timeline & Bento Grid (`fl_chart`, `lucide_icons_flutter`, `flutter_slidable`):**
+  - Thanh chọn 7 ngày, thẻ Bento tiến độ (`PieChart` Donut), theo dõi lượng nước `+200ml` (`waterIntakeMlProvider`), dòng thời gian 4 buổi (`Sáng`, `Trưa`, `Chiều`, `Tối`), biểu đồ thống kê 7 ngày `fl_chart`, bo góc `20dp`.
 - **Phân tích Thể trạng, Dinh dưỡng & Giấc ngủ (`BodyNutritionAnalyzer` & `SleepPlanner`):**
   - Tính BMI (chuẩn Châu Á), BMR (Mifflin-St Jeor), TDEE, lượng đạm/ngày, tỷ lệ đĩa ăn, lượng nước & chu kỳ uống nước.
   - Hỗ trợ chế độ ăn **Ăn đa dạng / Chay trứng sữa / Thuần chay**, **Tập Gym** (Pre/Post-workout, +600ml nước), **Ca làm việc** (Ban ngày / Ca đêm / Xoay ca neo theo giờ thức) và lưu ý sức khỏe (Đau dạ dày/Trào ngược, Đường huyết, Lớn tuổi/Tim mạch).
@@ -33,6 +39,7 @@ cd nhac_nho
 flutter analyze
 flutter test
 flutter build apk --debug
+flutter build apk --release --split-per-abi
 ```
 
 ## Ảnh màn hình
